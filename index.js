@@ -2,6 +2,9 @@ import express from "express";
 import dotenv from "dotenv";
 import conectarDB from "./config/db.js";
 import admistradorRoutes from "./routes/administradorRoutes.js"
+import pacienteRoutes from "./routes/pacienteRoutes.js"
+import doctorRoutes from "./routes/doctorRoutes.js"
+
 
 const app = express();
 app.use(express.json())
@@ -14,6 +17,8 @@ conectarDB();
 
 // Routing
 app.use("/api/administradores", admistradorRoutes);
+app.use("/api/pacientes", pacienteRoutes)
+app.use("/api/doctor", doctorRoutes)
 
 const PORT = process.env.PORT || 4444
 
