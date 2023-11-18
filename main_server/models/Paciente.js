@@ -32,7 +32,6 @@ const pacienteSchema = mongoose.Schema({
     },
     telefonoPaciente: {
         type: String,
-        required: true,
         trim: true
     },
     tarjetaPaciente: {

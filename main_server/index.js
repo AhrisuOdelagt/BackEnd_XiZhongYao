@@ -21,7 +21,7 @@ app.use(cors());
 // Routing
 app.use("/api/administradores", admistradorRoutes);
 app.use("/api/pacientes", pacienteRoutes)
-app.use("/api/doctor", doctorRoutes)
+app.use("/api/doctores", doctorRoutes)
 
 const PORT = process.env.PORT || 4444
 

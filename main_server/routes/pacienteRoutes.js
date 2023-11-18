@@ -7,6 +7,6 @@ import { registrarPaciente, loginPaciente, confirmarPaciente } from "../controll
 
 router.post("/", registrarPaciente)
 router.post("/login", loginPaciente);
-router.post("/confirmar/:tokenPaciente", confirmarPaciente);
+router.get("/confirmar/:tokenPaciente", confirmarPaciente);
 
 export default router;
