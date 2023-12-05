@@ -6,6 +6,7 @@ import admistradorRoutes from "./routes/administradorRoutes.js"
 import pacienteRoutes from "./routes/pacienteRoutes.js"
 import doctorRoutes from "./routes/doctorRoutes.js"
 
+// Iniciamos la aplicación
 const app = express();
 app.use(express.json())
 

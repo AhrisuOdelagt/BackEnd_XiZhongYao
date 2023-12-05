@@ -2,16 +2,21 @@ import Administrador from "../models/Administrador.js";
 import generarId from "../helpers/generarId.js";
 import generarJWT from "../helpers/generarJWT.js";
 import { emailRegistro, emailRestablecer } from "../helpers/emails.js";
+import { cifrar, descifrar } from "../helpers/cifrar_descifrar.js";
 
 // Autenticación, Registro y Confirmación de Administradores
 const registrarAdministrador = async (req, res) => {
     // Evitamos registros duplicados (con el mismo correo)
-    const { emailAdmin } = req.body;
+    let { emailAdmin } = req.body;
+    emailAdmin = cifrar(emailAdmin)
     const existeAdmin = await Administrador.findOne({ emailAdmin });
     if (existeAdmin) {
         const error = new Error("Este administrador ya está registrado.");
         return res.status(400).json({ msg: error.message});
     }
+    emailAdmin = descifrar(emailAdmin)
+
+    // Creamos al administrador
     try {
         const administrador = new Administrador(req.body);
         // Generamos el username
@@ -25,6 +30,12 @@ const registrarAdministrador = async (req, res) => {
             nombre: administrador.usernameAdmin,
             token: administrador.tokenAdmin
         });
+        // Ciframos los datos generados para el administrador
+        administrador.nameAdmin = cifrar(administrador.nameAdmin)
+        administrador.surnameAdmin = cifrar(administrador.surnameAdmin)
+        administrador.usernameAdmin = cifrar(administrador.usernameAdmin)
+        administrador.emailAdmin = cifrar(administrador.emailAdmin)
+        await administrador.save();
         res.json({ msg: "Administrador registrado correctamente." });
     } catch (error) {
         console.log(error);
@@ -33,13 +44,15 @@ const registrarAdministrador = async (req, res) => {
 
 const loginAdministrador = async (req, res) => {
     // Comprobamos que el administrador exista
-    const { emailAdmin, passwordAdmin } = req.body;
+    let { emailAdmin, passwordAdmin } = req.body;
+    emailAdmin = cifrar(emailAdmin)
     const administrador = await Administrador.findOne({ emailAdmin });
     if (!administrador) {
         const error = new Error("El administrador no existe.")
         return res.status(404).json({ msg: error.message});
     }
-
+    emailAdmin = descifrar(emailAdmin)
+    
     // Comprobamos que el administrador esté confirmado
     if (!administrador.isConfirmed) {
         const error = new Error("Esta cuenta de administrador no está confirmada.");
@@ -50,10 +63,10 @@ const loginAdministrador = async (req, res) => {
     if (await administrador.comprobarPassword(passwordAdmin)) {
         res.json({ 
             _id: administrador._id,
-            nameAdmin: administrador.nameAdmin,
-            surnameAdmin: administrador.surnameAdmin,
-            usernameAdmin: administrador.usernameAdmin,
-            emailAdmin: administrador.emailAdmin,
+            /*nameAdmin: descifrar(administrador.nameAdmin),
+            surnameAdmin: descifrar(administrador.surnameAdmin),
+            usernameAdmin: descifrar(administrador.usernameAdmin),
+            emailAdmin: descifrar(administrador.emailAdmin),*/
             token: generarJWT(administrador._id)
          });
     }
@@ -84,20 +97,22 @@ const confirmarAdministrador = async (req, res) => {
 };
 
 const olvidePassword = async (req, res) => {
-    const { emailAdmin } = req.body;
+    let { emailAdmin } = req.body;
+    emailAdmin = cifrar(emailAdmin)
     // Verificamos que el administrador exista
     const administrador = await Administrador.findOne({ emailAdmin });
     if (!administrador) {
         const error = new Error("El administrador no existe.")
         return res.status(404).json({ msg: error.message});
     }
+    emailAdmin = descifrar(emailAdmin)
     try {
         administrador.tokenAdmin = generarId();
         await administrador.save();
         // Enviamos el email para restablecer la contraseña
         emailRestablecer({
-            email: administrador.emailAdmin,
-            nombre: administrador.usernameAdmin,
+            email: descifrar(administrador.emailAdmin),
+            nombre: descifrar(administrador.usernameAdmin),
             token: administrador.tokenAdmin
         });
         res.json({ msg: "Se ha enviado un email con instrucciones." });

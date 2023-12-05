@@ -13,7 +13,6 @@ const emailRegistro = async (datos) => {
           pass: process.env.MASTER_P
         }
       });
-    console.log(email);
     // Información del email
     const info = await transport.sendMail({
         from: '"XiZhongYao — Administrador de la Base de Datos" «xizhongyaoisw@gmail.com»',
@@ -42,7 +41,6 @@ const emailRestablecer = async (datos) => {
           pass: process.env.MASTER_P
         }
       });
-    console.log(email);
     // Información del email
     const info = await transport.sendMail({
         from: '"XiZhongYao — Administrador de la Base de Datos" «xizhongyaoisw@gmail.com»',
