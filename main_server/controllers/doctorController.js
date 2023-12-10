@@ -1,17 +1,22 @@
 import Doctor from "../models/Doctor.js";
 import generarId from "../helpers/generarId.js";
 import generarJWT from "../helpers/generarJWT.js";
+import { emailRegistro, emailRestablecer } from "../helpers/emails.js";
+import { cifrar, descifrar } from "../helpers/cifrar_descifrar.js";
 
 //Autenticacion, registro y confirmacion de Doctor
 const registrarDoctor = async (req, res) => {
     //Evitamos correos duplicados
     const {emailDoctor} = req.body;
+    emailDoctor = cifrar(emailDoctor)
     const existeDoctor = await Doctor.findOne({emailDoctor})
     if (existeDoctor) {
         console.log(existeDoctor)
         const error = new Error("Este correo ya ha sido usado")     //Confirmar mensaje
         return res.status(400).json({msg: error.message});
     }
+    emailDoctor = descifrar(emailDoctor)
+
     try {
         const doctor = new Doctor(req.body)
         //Generamos el username
@@ -20,6 +25,21 @@ const registrarDoctor = async (req, res) => {
         doctor.tokenDoctor = generarId();
         const doctorAlmacenado = await doctor.save();
         console.log(doctorAlmacenado);
+
+        //Email de confirmación
+        emailRegistro({
+            email: doctor.emailDoctor,
+            nombre: doctor.usernameDoctor,
+            token: doctor.tokenDoctor
+        })
+
+        //Ciframos los datos generados
+        doctor.nameDoctor = cifrar(doctor.nameDoctor)
+        doctor.surnameDoctor = cifrar(doctor.surnameDoctor)
+        doctor.usernameDoctor = cifrar(doctor.usernameDoctor)
+        doctor.emailDoctor = cifrar(doctor.emailDoctor)
+        await doctor.save()
+        
         res.json({msg: "Doctor registrado correctamente"})
     } catch (error) {
         console.log(error);
@@ -29,11 +49,14 @@ const registrarDoctor = async (req, res) => {
 const loginDoctor = async (req, res) => {
     //Verificamos la existencia del doctor
     const {emailDoctor, passwordDoctor} = req.body;
+    emailDoctor = cifrar(emailDoctor)
     const doctor = await Doctor.findOne({emailDoctor})
     if (!doctor) {
         const error = new Error("El paciente no existe.")
         return res.status(404).json({msg: error.message})
     }
+
+    emailDoctor = descifrar(emailDoctor)
 
     //Comprobamos que el paciente este confirmado
     if (!paciente.isConfirmed) {
@@ -51,10 +74,10 @@ const loginDoctor = async (req, res) => {
     if (await doctor.comprobarPassword) {
         res.json({
             _id: doctor._id,
-            nameDoctor: doctor.nameDoctor,
+            /*nameDoctor: doctor.nameDoctor,
             surnameDoctor: doctor.surnameDoctor,
             usernameDoctor: doctor.usernameDoctor,
-            emailDoctor: doctor.emailDoctor,
+            emailDoctor: doctor.emailDoctor,*/
             token: generarJWT(doctor._id)
         })
     }
@@ -95,8 +118,68 @@ const aceptarDoctor = async (req, res) => {
     }
 };
 
+const olvidePassword = async (req, res) => {
+    let { emailDoctor } = req.body;
+    emailDoctor = cifrar(emailDoctor)
+    // Verificamos que el doctor exista
+    const doctor = await Doctor.findOne({ emailDoctor });
+    if (!doctor) {
+        const error = new Error("El doctor no existe.")
+        return res.status(404).json({ msg: error.message});
+    }
+    emailDoctor = descifrar(emailDoctor)
+    try {
+        doctor.tokenDoctor = generarId();
+        await doctor.save();
+        // Enviamos el email para restablecer la contraseña
+        emailRestablecer({
+            email: descifrar(doctor.emailDoctor),
+            nombre: descifrar(doctor.usernameDoctor),
+            token: doctor.tokenDoctor
+        });
+        res.json({ msg: "Se ha enviado un email con instrucciones." });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+const comprobarToken = async (req, res) => {
+    const { tokenDoctor } = req.params;
+    // Verificamos que el token exista dentro de la BD
+    const tokenValido = await Doctor.findOne({ tokenDoctor });
+    if (tokenValido) {
+        res.json({ msg: "Token válido." });
+    }
+    else {
+        const error = new Error("Este token es inválido.");
+        return res.status(403).json({ msg: error.message});
+    }
+};
+
+const nuevoPassword = async (req, res) => {
+    const { tokenDoctor } = req.params;
+    const { passwordDoctor } = req.body;
+    // Verificamos que el token exista dentro de la BD
+    const doctor = await Doctor.findOne({ tokenDoctor });
+    if (doctor) {
+        doctor.passwordDoctor = passwordDoctor;
+        doctor.tokenDoctor = undefined;
+        await doctor.save();
+        res.json({ msg: "Se ha completado la operación correctamente." });
+    }
+    else {
+        const error = new Error("Este token es inválido.");
+        return res.status(403).json({ msg: error.message});
+    }
+};
+//perfil
+
 export {
     registrarDoctor,
     loginDoctor,
-    confirmarDoctor
+    confirmarDoctor,
+    aceptarDoctor,
+    olvidePassword,
+    comprobarToken,
+    nuevoPassword
 };

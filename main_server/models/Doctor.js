@@ -44,7 +44,7 @@ const doctorSchema = mongoose.Schema({
         default: false
     },
     especialidad: {
-        type: String,
+        type: String,           //Arreglo?
         trim: true,
         required: true
     },
