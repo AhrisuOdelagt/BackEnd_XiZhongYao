@@ -1,4 +1,5 @@
 import Doctor from "../models/Doctor.js";
+import Administrador from "../models/Administrador.js";
 import generarId from "../helpers/generarId.js";
 import generarJWT from "../helpers/generarJWT.js";
 import { emailRegistro, emailRestablecer } from "../helpers/emails.js";
@@ -7,7 +8,7 @@ import { cifrar, descifrar } from "../helpers/cifrar_descifrar.js";
 //Autenticacion, registro y confirmacion de Doctor
 const registrarDoctor = async (req, res) => {
     //Evitamos correos duplicados
-    const {emailDoctor} = req.body;
+    let {emailDoctor} = req.body;
     emailDoctor = cifrar(emailDoctor)
     const existeDoctor = await Doctor.findOne({emailDoctor})
     if (existeDoctor) {
@@ -20,7 +21,7 @@ const registrarDoctor = async (req, res) => {
     try {
         const doctor = new Doctor(req.body)
         //Generamos el username
-        doctor.usernameDoctor = paciente.nameDoctor + " " + paciente.Doctor;
+        doctor.usernameDoctor = doctor.nameDoctor + " " + doctor.surnameDoctor;
         //Generamos el token
         doctor.tokenDoctor = generarId();
         const doctorAlmacenado = await doctor.save();
@@ -37,7 +38,7 @@ const registrarDoctor = async (req, res) => {
         doctor.nameDoctor = cifrar(doctor.nameDoctor)
         doctor.surnameDoctor = cifrar(doctor.surnameDoctor)
         doctor.usernameDoctor = cifrar(doctor.usernameDoctor)
-        doctor.emailDoctor = cifrar(doctor.emailDoctor)
+        doctor.emailDoctor = cifrar(doctor.emailDoctor)        
         await doctor.save()
         
         res.json({msg: "Doctor registrado correctamente"})
@@ -52,20 +53,20 @@ const loginDoctor = async (req, res) => {
     emailDoctor = cifrar(emailDoctor)
     const doctor = await Doctor.findOne({emailDoctor})
     if (!doctor) {
-        const error = new Error("El paciente no existe.")
+        const error = new Error("El doctor no existe.")
         return res.status(404).json({msg: error.message})
     }
 
     emailDoctor = descifrar(emailDoctor)
 
-    //Comprobamos que el paciente este confirmado
-    if (!paciente.isConfirmed) {
+    //Comprobamos que el doctor este confirmado
+    if (!doctor.isConfirmed) {
         const error = new Error("Esta cuenta no esta confirmada.")   //Confirmar mensaje
         return res.status(403).json({msg:error.message})
     }
 
     //Comprobamos que este aceptado
-    if (!paciente.isAccepted) {
+    if (!doctor.isAccepted) {
         const error = new Error("Esta cuenta aun no ha sido aceptada.")   //Confirmar mensaje
         return res.status(403).json({msg:error.message})
     }
@@ -108,13 +109,37 @@ const confirmarDoctor = async (req, res) => {
 
 //Checar funcionamiento, dudas si esto va en Admin
 const aceptarDoctor = async (req, res) => {
-    try {
-        doctorConfirmar.isAccepted = true;
-        doctorConfirmar.tokenDoctor = undefined;
-        await doctorConfirmar.save();
-        res.json({ msg: "Cuenta confirmada con éxito." });
-    } catch (error) {
-        console.log(error);
+
+    // Autenticamos sesión del administrador
+    let emailAdmin;
+    emailAdmin = req.administrador.emailAdmin;
+    const admin = await Administrador.findOne({ emailAdmin });
+    // Verificamos una sesión de administrador activa
+    if (!admin) {
+        const error = new Error("Este usuario no ha iniciado sesión.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que el administador esté autorizado
+    if(admin.isAdmin == false){
+        const error = new Error("Este usuario no es administrador o no está autorizado.");
+        return res.status(403).json({msg: error.message});
+    }
+
+    let {emailDoctor} = req.body;
+    emailDoctor = cifrar(emailDoctor)
+    const doctorAceptar = await Doctor.findOne({emailDoctor}) 
+
+    if(doctorAceptar){
+        try {
+            doctorAceptar.isAccepted = true;
+            await doctorAceptar.save();
+            res.json({ msg: "Doctor aceptado con exito" });
+        } catch (error) {
+            console.log(error);
+        }
+    }else {
+        const error = new Error("Este correo es inválido.");
+        return res.status(403).json({ msg: error.message});
     }
 };
 

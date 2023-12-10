@@ -50,7 +50,7 @@ const registrarPaciente = async (req, res) => {
 
 const loginPaciente = async (req, res) => {
     //Verificamos la existencia del paciente
-    const {emailPaciente, passwordPaciente} = req.body;
+    let {emailPaciente, passwordPaciente} = req.body;
     emailPaciente = cifrar(emailPaciente)
     const paciente = await Paciente.findOne({emailPaciente})
     if (!paciente) {
@@ -65,7 +65,7 @@ const loginPaciente = async (req, res) => {
     }
 
     //Comprobamos el password
-    if (await paciente.comprobarPassword) {
+    if (await paciente.comprobarPassword(passwordPaciente)) {
         res.json({
             _id: paciente._id,
             /*namePaciente: paciente.namePaciente,
