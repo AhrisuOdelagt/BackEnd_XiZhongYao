@@ -20,6 +20,15 @@ conectarDB();
 // Permitimos peticiones por CORS
 app.use(cors());
 
+// Importamos la API Cloudinary para el manejo de imágenes
+import {v2 as cloudinary} from 'cloudinary';
+          
+cloudinary.config({ 
+  cloud_name: process.env.CLD_N, 
+  api_key: process.env.APK, 
+  api_secret: process.env.APS 
+});
+
 // Routing
 app.use("/api/administradores", admistradorRoutes);
 app.use("/api/pacientes", pacienteRoutes);

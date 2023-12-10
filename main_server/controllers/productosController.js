@@ -19,7 +19,7 @@ const registrarProducto = async (req, res) => {
     }
 
     // Leemos la información del JSON
-    const {
+    let {
         nombreProducto,
         descrProducto,
         precioProducto,
@@ -52,6 +52,8 @@ const registrarProducto = async (req, res) => {
         else{
             producto.statusProducto = "Agotado";
         }
+        // Intercambiamos espacios por guiones bajos en el nombre
+        producto.nombreProducto = producto.nombreProducto.replace(/ /g, "_");
         // Guardamos el producto en la base
         await producto.save();
         res.json({
@@ -176,6 +178,8 @@ const modificarProducto = async (req, res) => {
         else{
             productoModificado.statusProducto = "Agotado";
         }
+        // Intercambiamos espacios por guiones bajos en el nombre
+        productoModificado.nombreProducto = productoModificado.nombreProducto.replace(/ /g, "_");
         await productoModificado.save();
         res.json({
             msg: "Producto actualizado exitosamente"

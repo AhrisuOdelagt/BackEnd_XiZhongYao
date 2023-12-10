@@ -72,7 +72,7 @@ const loginDoctor = async (req, res) => {
     }
 
     //Comprobamos el password
-    if (await doctor.comprobarPassword) {
+    if (await doctor.comprobarPassword(passwordDoctor)) {
         res.json({
             _id: doctor._id,
             /*nameDoctor: doctor.nameDoctor,
