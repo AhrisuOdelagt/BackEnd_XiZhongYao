@@ -1,5 +1,7 @@
 import Producto from "../models/Producto.js";
 import Administrador from "../models/Administrador.js";
+import { removeImage,
+    uploadImg } from "../helpers/gestionImagenes.js";
 
 // Registrar un producto en la base de Datos
 const registrarProducto = async (req, res) => {
@@ -19,12 +21,13 @@ const registrarProducto = async (req, res) => {
     }
 
     // Leemos la información del JSON
-    const {
+    let {
         nombreProducto,
         descrProducto,
         precioProducto,
         cantidadInv,
-        categoriaProducto
+        categoriaProducto,
+        imagenProducto
     } = req.body;
     const existeProducto = await Producto.findOne({ nombreProducto });
     // Verificamos que no exista un producto con el mismo nombre
@@ -40,7 +43,8 @@ const registrarProducto = async (req, res) => {
             descrProducto,
             precioProducto,
             cantidadInv,
-            categoriaProducto
+            categoriaProducto,
+            imagenProducto
         });
         // Determinamos el Status del producto
         if(producto.cantidadInv > 30){
@@ -52,6 +56,19 @@ const registrarProducto = async (req, res) => {
         else{
             producto.statusProducto = "Agotado";
         }
+
+        // Intercambiamos espacios por guiones bajos en el nombre
+        producto.nombreProducto = producto.nombreProducto.replace(/ /g, "_");
+
+        //Verificamos que el campo de imagen no esté vacío
+        if (producto.imagenProducto === "") {
+            const error = new Error("El producto no cuenta con imagen");
+            return res.status(401).json({ msg: error.message});
+        }
+
+        // Subimos la imagen a Cloudinary
+        const path = producto.imagenProducto;
+        await uploadImg(path, producto);
         // Guardamos el producto en la base
         await producto.save();
         res.json({
@@ -150,18 +167,25 @@ const modificarProducto = async (req, res) => {
             descrProducto_modificar,
             precioProducto_modificar,
             cantidadInv_modificar,
-            categoriaProducto_modificar
+            categoriaProducto_modificar,
+            imagenProducto_modificar
         } = req.body;
 
-        // Verificamos que no existan conflictos de nombre
-        nombreProducto = nombreProducto_modificar;
-        const coincidencia = await Producto.findOne({ nombreProducto });
-        nombreProducto = req.params;
-        if (coincidencia) {
-            const error = new Error("Este producto ya existe.");
-            return res.status(403).json({msg: error.message});
+        // Revisamos si el nombre tiene que ser modificado
+        if (nombreProducto_modificar !== "") {
+            // Verificamos que no existan conflictos de nombre
+            nombreProducto = nombreProducto_modificar;
+            const coincidencia = await Producto.findOne({ nombreProducto });
+            nombreProducto = req.params;
+            if (coincidencia) {
+                const error = new Error("Este producto ya existe.");
+                return res.status(403).json({msg: error.message});
+            }
         }
-        productoModificado.nombreProducto = nombreProducto_modificar;
+
+        if (nombreProducto_modificar !== "") {
+            productoModificado.nombreProducto = nombreProducto_modificar;
+        }
         productoModificado.descrProducto = descrProducto_modificar;
         productoModificado.precioProducto = precioProducto_modificar;
         productoModificado.cantidadInv = cantidadInv_modificar;
@@ -176,6 +200,18 @@ const modificarProducto = async (req, res) => {
         else{
             productoModificado.statusProducto = "Agotado";
         }
+        // Intercambiamos espacios por guiones bajos en el nombre
+        productoModificado.nombreProducto = productoModificado.nombreProducto.replace(/ /g, "_");
+
+        // Verificamos si hubo imágenes modificadas
+        if (imagenProducto_modificar !== "") {
+            // Borramos la imagen anterior
+            await removeImage(productoModificado.imagenProducto);
+            // Añadimos la imagen nueva
+            productoModificado.imagenProducto = imagenProducto_modificar;
+            await uploadImg(imagenProducto_modificar, productoModificado);
+        }
+
         await productoModificado.save();
         res.json({
             msg: "Producto actualizado exitosamente"
@@ -210,6 +246,9 @@ const eliminarProducto = async (req, res) => {
             const error = new Error("El producto no está registrado.");
             return res.status(404).json({msg: error.message});
         }
+
+        // Eliminamos de Cloudinary la imagen asociada
+        await removeImage(productoModificado.imagenProducto);
 
         await productoModificado.deleteOne();
         res.json({msg: "Producto eliminado"});

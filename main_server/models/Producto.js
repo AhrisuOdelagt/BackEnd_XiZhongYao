@@ -28,7 +28,7 @@ const productoSchema = mongoose.Schema({
         trim: true,
     },
     imagenProducto: {
-        type: String,    // Provisional hasta hallar la manera de leer e interpretar binarios
+        type: String,
         trim: true,
     },
     categoriaProducto: {
