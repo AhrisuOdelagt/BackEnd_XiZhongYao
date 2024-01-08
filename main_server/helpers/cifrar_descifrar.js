@@ -24,6 +24,11 @@ const descifrar = (cifra) => {
     return decrypted;
 }
 
+// Pruebas
+// const plainText = "I am Cinderella Nice to Meet You!";
+// const ciphertext_hex = cifrar(plainText);
+// console.log(ciphertext_hex);
+
 export {
     cifrar,
     descifrar

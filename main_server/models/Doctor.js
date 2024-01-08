@@ -3,6 +3,19 @@ import mongoose from "mongoose";
 // Importamos bcrypt para aplicar Hash a las contraseñas
 import bcrypt from "bcrypt";
 
+// Creamos el esquema embebido de archivos y documentos
+const archivosSchema = mongoose.Schema({
+    _id : false,
+    nombre: String,
+    datos: Buffer,
+});
+  
+  const documentosSchema = mongoose.Schema({
+    _id : false,
+    tituloDoctor: archivosSchema,
+    cedulaDoctor: archivosSchema,
+});
+
 //Modelo de Doctor
 const doctorSchema = mongoose.Schema({
     nameDoctor: {
@@ -32,7 +45,14 @@ const doctorSchema = mongoose.Schema({
     },
     telefonoDoctor: {
         type: String,
-        required: true,
+        trim: true
+    },
+    direccion: {
+        type: String,
+        trim: true
+    },
+    direccion_maps: {
+        type: String,
         trim: true
     },
     isConfirmed: {
@@ -44,7 +64,7 @@ const doctorSchema = mongoose.Schema({
         default: false
     },
     especialidad: {
-        type: String,           //Arreglo?
+        type: String,
         trim: true,
         required: true
     },
@@ -61,7 +81,7 @@ const doctorSchema = mongoose.Schema({
                                 //Modificar en cuanto se tenga modelo Semana
     },
     documentos: {
-                                //Modificar en cuanto se tenga modelo Documentos
+        type: documentosSchema
     },
     tokenDoctor: {
         type: String,
