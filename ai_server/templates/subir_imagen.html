@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir Imagen</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            background-color: #0860008a;
+            color: #000000;
+            padding: 1em;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #555;
+            padding: 0.5em;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 0.5em 1em;
+            margin: 0 0.5em;
+            border-radius: 3px;
+        }
+
+        section {
+            padding: 1em;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 1em;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>XiZhongYao</h1>
+    </header>
+    <section>
+        <h2>Identificar Planta</h2>
+        <h3>Procura que la fotografía cumpla con los siguientes rubros: </h3>
+        <ul>
+            <li>La planta debe estar en primer plano.</li>
+            <li>Intenta que no haya elementos obstruyendo a la planta.</li>
+            <li>Si la planta está en una maceta, o está siendo sujetada o plantada, intenta que estos elementos aparezcan lo menos posible.</li>
+        </ul>
+        <form action="/predicciones" method="post" enctype="multipart/form-data">
+            <label for="imagen">Selecciona una imagen:</label>
+            <input type="file" name="imagen" accept="image/*" required>
+            <br>
+            <br>
+            <button type="submit">Realizar Predicción</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; XiZhongYao    2023 — 2024</p>
+    </footer>
+
+</body>
+</html>
