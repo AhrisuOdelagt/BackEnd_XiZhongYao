@@ -52,13 +52,38 @@ const pacienteSchema = mongoose.Schema({
         trim: true
     },
     carritoCompras: {
-                            //Modificar en cuanto se tenga el modelo Carrito  
+        type: [carritoComprasSchema],
     },
     tokenPaciente: {
         type: String,
         trim: true 
     } 
-})
+});
+
+// Creación del esquema del documento embebido CarritoCompras
+const carritoComprasSchema = mongoose.Schema({
+    _id : false,
+    producto_C: {
+        type: String,
+        trim: true,
+    },
+    cantidad_C: {
+        type: Number,
+        trim: true,
+    },
+    totalParcial_C: {
+        type: Number,
+        trim: true,
+    },
+    copiaInv_C: {
+        type: Number,
+        trim: true
+    },
+    img_C: {
+        type: String,
+        trim: true
+    }
+});
 
 // Aplicamos un Hash a la contraseña antes de guardarla en la base de datos
 pacienteSchema.pre("save", async function(next){

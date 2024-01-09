@@ -76,4 +76,5 @@ const pedidoSchema = new mongoose.Schema({
 });
 
 //Creacion del modelo
-const Pedido = mongoose.model("Pedido". pedidoSchema)
+const Pedido = mongoose.model("Pedido". pedidoSchema);
+export default Producto;
