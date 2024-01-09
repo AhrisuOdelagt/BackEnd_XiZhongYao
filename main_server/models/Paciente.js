@@ -3,7 +3,22 @@ import mongoose from "mongoose";
 // Importamos bcrypt para aplicar Hash a las contraseñas
 import bcrypt from "bcrypt";
 
-//Modelo de paciente
+// Modelos para las citas
+const horariosSchema = mongoose.Schema({
+    _id : false,
+    dia: String,
+    horaInicio: String,
+    horaFin: String
+});
+
+const citasSchema = mongoose.Schema({
+    _id : false,
+    horario: horariosSchema,
+    pacienteEmail: String,
+    estado: Boolean
+});
+
+// Modelo de paciente
 const pacienteSchema = mongoose.Schema({
     namePaciente: {
         type: String,
@@ -42,10 +57,10 @@ const pacienteSchema = mongoose.Schema({
         default: false
     },
     historialAnalisis: {
-        type: String        //Modificar en cuanto se tenga el modelo Analisis
+        type: [String]
     },
     citasPaciente: {
-                            //INVESTIGAR
+        type: [citasSchema]
     },
     pedidosPaciente: {  
         type: [String],     //Modificar en cuanto se tenga el modelo Pedidos

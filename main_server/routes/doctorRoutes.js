@@ -11,7 +11,11 @@ import  {
         olvidePassword,
         comprobarToken,
         nuevoPassword,
-        modificarInformacion
+        modificarInformacion,
+        nuevoHorario,
+        removerHorario,
+        verCitas,
+        procesarCita
         } from "../controllers/doctorController.js";
 
 //Registro, login y confirmar Doctores
@@ -24,5 +28,12 @@ router.get("/olvide-password/:tokenDoctor", comprobarToken);
 router.post("/olvide-password/:tokenDoctor", nuevoPassword);
 // Modificar información
 router.put("/main/modificar-informacion", checkAuthDoctor, modificarInformacion);
+// Agregar horarios
+router.put("/main/agregar-horario", checkAuthDoctor, nuevoHorario);
+router.delete("/main/eliminar-horario", checkAuthDoctor, removerHorario);
+// Ver citas
+router.get("/main/ver-citas", checkAuthDoctor, verCitas);
+// Procesar citas
+router.post("/main/procesar-citas", checkAuthDoctor, procesarCita);
 
 export default router;

@@ -1,7 +1,8 @@
 import Paciente from "../models/Paciente.js";
+import Doctor from "../models/Doctor.js";
 import generarId from "../helpers/generarId.js";
 import generarJWT from "../helpers/generarJWT.js";
-import { emailRegistro, emailRestablecer } from "../helpers/emails.js";
+import { emailRegistro, emailRestablecer, emailSolicitarCita } from "../helpers/emails.js";
 import { cifrar, descifrar } from "../helpers/cifrar_descifrar.js";
 
 //Autenticacion, registro y confirmacion de Pacientes
@@ -155,11 +156,137 @@ const nuevoPassword = async (req, res) => {
     }
 };
 
-//ModificarDatos
+// Generar cita
+const generarCita = async (req, res) => {
+    // Autenticamos al usuario
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    // Verificamos una sesión de doctor activa
+    if (!paciente) {
+        const error = new Error("Este usuario no ha iniciado sesión.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté confirmada
+    if(paciente.isConfirmed == false){
+        const error = new Error("Esta cuenta no está confirmada.");
+        return res.status(403).json({msg: error.message});
+    }
 
-const perfil = async (req, res) => {
+    // Obtenemos los parámetros JSON
+    let {
+        emailDoctor,
+        dia,
+        horaInicio,
+        horaFin
+    } = req.body;
 
-}
+    try {
+        // Revisamos que el doctor exista
+        emailDoctor = cifrar(emailDoctor);
+        const doctor = await Doctor.findOne({ emailDoctor });
+        emailDoctor = descifrar(emailDoctor);
+
+        // Retornamos mensaje si el doctor no existe
+        if (!doctor) {
+            return res.json({ msg: "Este doctor no existe o no está registrado." });
+        }
+
+        // Revisamos que el horario esté disponible para ese doctor
+        const horarios = doctor.horariosAtencion;
+        if (horarios.length != 0) {
+            for (let index = 0; index < horarios.length; index++) {
+                const element = horarios[index];
+                if (element.dia === dia
+                    && element.horaInicio === horaInicio
+                    && element.horaFin === horaFin) {
+                    break;
+                }
+                if (index == horarios.length - 1) {
+                    return res.json({ msg: "Este horario no existe." });
+                }
+            }
+        }
+
+        // Revisamos que no haya ya una cita con la hora seleccionada
+        const citasDoctor = doctor.citasDoctor;
+        if (citasDoctor.length != 0) {
+            for (let index = 0; index < citasDoctor.length; index++) {
+                const element = citasDoctor[index];
+                if (element.horario.dia === dia
+                    && element.horario.horaInicio === horaInicio
+                    && element.horario.horaFin === horaFin) {
+                        return res.json({ msg: "Este horario ya está ocupado." });
+                }
+            }
+        }
+
+        // Generamos preliminarmente la cita y enviamos correo al doctor
+        const cita = {
+            horario: {
+                dia: dia,
+                horaInicio: horaInicio,
+                horaFin: horaFin
+            },
+            pacienteEmail: paciente.emailPaciente
+        }
+        doctor.citasDoctor.push(cita);
+        // Guardamos los datos
+        await doctor.save();
+
+        // Enviamos un correo al doctor para avisar que se intenta agendar una cita
+        emailSolicitarCita({
+            email: descifrar(doctor.emailDoctor),
+            nombreDoctor: descifrar(doctor.usernameDoctor),
+            nombrePaciente: descifrar(paciente.usernamePaciente),
+            dia: dia,
+            horaInicio: horaInicio,
+            horaFin: horaFin
+        });
+
+        // Enviamos un mensaje de confirmación
+        res.json({ msg: "Se ha enviado la solicitud para su cita." });
+
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+// Ver doctores
+const verDoctores = async (req, res) => {
+    // Autenticamos al usuario
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    // Verificamos una sesión de doctor activa
+    if (!paciente) {
+        const error = new Error("Este usuario no ha iniciado sesión.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté confirmada
+    if(paciente.isConfirmed == false){
+        const error = new Error("Esta cuenta no está confirmada.");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Mostramos en un JSON todos los doctores
+    try {
+        // Conseguimos la información de los doctores
+        const doctores = await Doctor.find({}, { emailDoctor: 1, usernameDoctor: 1, _id: 0 });
+
+        // Ajustamos la información para sólo mostrar emails y usernames
+        const infoDoctores = doctores.map(doctor => ({
+            emailDoctor: descifrar(doctor.emailDoctor),
+            usernameDoctor: descifrar(doctor.usernameDoctor)
+        }));
+
+        // Devolvemos la información en un JSON
+        res.json(infoDoctores);
+
+    } catch (error) {
+        console.log(error);
+    }
+};
 
 export {
     registrarPaciente,
@@ -167,5 +294,7 @@ export {
     confirmarPaciente, 
     olvidePassword,
     comprobarToken,
-    nuevoPassword
+    nuevoPassword,
+    generarCita,
+    verDoctores
 };
