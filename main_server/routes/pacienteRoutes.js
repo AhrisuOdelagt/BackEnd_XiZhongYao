@@ -16,7 +16,7 @@ import { registrarPaciente,
     visualizarCarrito,
     verHistorialPedidos,
     generarCita,
-    verDoctores } from "../controllers/pacienteController.js";} from "../controllers/pacienteController.js";
+    verDoctores } from "../controllers/pacienteController.js";
 
 import checkAuthPaciente from "../middleware/checkAuthPaciente.js";
 
