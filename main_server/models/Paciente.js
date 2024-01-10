@@ -2,6 +2,33 @@
 import mongoose from "mongoose";
 // Importamos bcrypt para aplicar Hash a las contraseñas
 import bcrypt from "bcrypt";
+// Importamos el modelo de los pedidos
+import Pedido from "./Pedido.js";
+
+// Creación del esquema del documento embebido CarritoCompras
+const carritoComprasSchema = mongoose.Schema({
+    _id : false,
+    producto_C: {
+        type: String,
+        trim: true,
+    },
+    cantidad_C: {
+        type: Number,
+        trim: true,
+    },
+    totalParcial_C: {
+        type: Number,
+        trim: true,
+    },
+    copiaInv_C: {
+        type: Number,
+        trim: true
+    },
+    img_C: {
+        type: String,
+        trim: true
+    }
+});
 
 //Modelo de paciente
 const pacienteSchema = mongoose.Schema({
@@ -42,13 +69,13 @@ const pacienteSchema = mongoose.Schema({
         default: false
     },
     historialAnalisis: {
-        type: String        //Modificar en cuanto se tenga el modelo Analisis
+        type: [String]        //Modificar en cuanto se tenga el modelo Analisis
     },
     citasPaciente: {
                             //INVESTIGAR
     },
     pedidosPaciente: {  
-        type: [String],     //Modificar en cuanto se tenga el modelo Pedidos
+        type: [String],
         trim: true
     },
     carritoCompras: {
@@ -58,31 +85,6 @@ const pacienteSchema = mongoose.Schema({
         type: String,
         trim: true 
     } 
-});
-
-// Creación del esquema del documento embebido CarritoCompras
-const carritoComprasSchema = mongoose.Schema({
-    _id : false,
-    producto_C: {
-        type: String,
-        trim: true,
-    },
-    cantidad_C: {
-        type: Number,
-        trim: true,
-    },
-    totalParcial_C: {
-        type: Number,
-        trim: true,
-    },
-    copiaInv_C: {
-        type: Number,
-        trim: true
-    },
-    img_C: {
-        type: String,
-        trim: true
-    }
 });
 
 // Aplicamos un Hash a la contraseña antes de guardarla en la base de datos

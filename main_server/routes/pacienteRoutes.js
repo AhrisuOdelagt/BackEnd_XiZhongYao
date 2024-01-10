@@ -15,8 +15,9 @@ import { registrarPaciente,
     visualizarCarrito,
     verHistorialPedidos} from "../controllers/pacienteController.js";
 
-//Registro, login y confirmar Paciente
+import checkAuthPaciente from "../middleware/checkAuthPaciente.js";
 
+//Registro, login y confirmar Paciente
 router.post("/", registrarPaciente)
 router.post("/login", loginPaciente);
 router.get("/confirmar/:tokenPaciente", confirmarPaciente);
@@ -25,18 +26,14 @@ router.get("/olvide-password/:tokenPaciente", comprobarToken)
 router.post("/olvide-password/:tokenPaciente", nuevoPassword)
 
 //Carrito
-router.post("/carrito/agregarProducto", agregarProductoCarrito);
-router.post("/carrito/incrementarProducto", incrementarProductoCarrito);
-router.post("/carrito/decrementarProducto", decrementarProductoCarrito);
-router.post("/carrito/eliminarProducto", eliminarProductoCarrito);
-router.get("/carrito/vaciarCarrito", vaciarCarrito);
-router.get("/carrito/visualizarCarrito", visualizarCarrito);
+router.post("/main/carrito/agregar-producto", checkAuthPaciente, agregarProductoCarrito);
+router.put("/main/carrito/incrementar-producto", checkAuthPaciente, incrementarProductoCarrito);
+router.delete("/main/carrito/decrementar-producto", checkAuthPaciente, decrementarProductoCarrito);
+router.delete("/main/carrito/eliminar-producto", checkAuthPaciente, eliminarProductoCarrito);
+router.delete("/main/carrito/vaciar-carrito", checkAuthPaciente, vaciarCarrito);
+router.get("/main/carrito/visualizar-carrito", checkAuthPaciente, visualizarCarrito);
 
 //Pedidos
-router.get("ped/visualizar", verHistorialPedidos);
-
-
-router.get("/perfil", )
-
+router.get("main/pedido/visualizar-pedido", checkAuthPaciente, verHistorialPedidos);
 
 export default router;

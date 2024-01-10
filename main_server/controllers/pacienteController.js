@@ -165,7 +165,6 @@ const perfil = async (req, res) => {
 
 //Carrito de compras
 const agregarProductoCarrito = async (req, res) => {
-    
     //Valicacion paciente
     let emailPaciente;
     emailPaciente = req.paciente.emailPaciente;
@@ -185,7 +184,7 @@ const agregarProductoCarrito = async (req, res) => {
     }
 
     //Verificamos que el producto no se haya añadido previamente
-    let productosCarrito = cliente.carritoCompras;
+    let productosCarrito = paciente.carritoCompras;
     for(let index = 0; index < productosCarrito.length; index++) {
         if(productosCarrito[index].producto_C == nombreProducto){
             const error = new Error("El producto ya se encuentra en el carrito");
@@ -208,9 +207,10 @@ const agregarProductoCarrito = async (req, res) => {
             img_C: productoPedido.imagenProducto
         }
         paciente.carritoCompras.push(carrito);
+        console.log(paciente.carritoCompras);
         await paciente.save();
-        res.json({
-            msg: "Se inicio el carrito"
+        return res.json({
+            msg: "Se inicio el carrito de compras"
         });
     } catch(error){
         console.log(error);
@@ -338,7 +338,7 @@ const decrementarProductoCarrito = async(req, res) => {
                 if(productosCarrito[index].cantidad_C > 1){
                     productosCarrito[index].cantidad_C -= 1;
                     productosCarrito[index].totalParcial_C = productoPedido.precioProducto * productosCarrito[index].cantidad_C;
-                    await cliente.save();
+                    await paciente.save();
                     res.json({ msg: "El producto se removió del carrito" });
                     break;
                 }
@@ -464,7 +464,7 @@ const visualizarCarrito = async (req, res) => {
 
     //Mostramos el carrito
     try {
-        res.json({carrito: cliente.carritoCompras})
+        res.json({carrito: paciente.carritoCompras})
     } catch(error){
         console.log(error)
     }

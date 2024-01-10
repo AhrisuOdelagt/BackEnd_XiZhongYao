@@ -1,9 +1,7 @@
 import Pedido from "../models/Pedido.js"
 import Paciente from "../models/Paciente.js"
-import Producto from "../models/Producto.js"
 
 //Generar pedido
-
 const generarPedido = async (req, res) => {
     // Realizamos validación del paciente
     let emailPaciente;
@@ -28,17 +26,15 @@ const generarPedido = async (req, res) => {
             return res.status(403).json({msg: error.message});
         }
     }
-
+    
     // Generamos el pedido
     try {
         const nombrePedido = `${paciente.usernamePaciente}_${Date.now().toString()}`
         const pedido = new Pedido({ nombrePedido });
         await pedido.save();
-        
         // Definimos los detalles del pedido
-        pedido.detallesPedido = [];
+        pedido.detallesPedidos = [];
         let compras = paciente.carritoCompras;
-        
         // console.log(compras);
         for (let index = 0; index < compras.length; index++) {
             let detalles = {
@@ -47,29 +43,34 @@ const generarPedido = async (req, res) => {
                 totalParcial_P: compras[index].totalParcial_C,
                 img_P: compras[index].img_C
             }
-            pedido.detallesPedido.push(detalles);
+            pedido.detallesPedidos.push(detalles);
         }
         await pedido.save();
         
         // Definimos el resto de atributos del pedido
-        let comprasPedido = pedido.detallesPedido;
+        let comprasPedido = pedido.detallesPedidos;
         for (let index = 0; index < comprasPedido.length; index++) {
+            console.log(comprasPedido[index])
             pedido.costoArticulos += comprasPedido[index].totalParcial_P;
+            console.log(pedido.costoArticulos)
             pedido.totalArticulos += comprasPedido[index].cantidad_P;
+            console.log(pedido.totalArticulos)
         }
-        if(pedido.costoArticulos < 300){
-            pedido.costoEnvio += 50;
-        }
-        let total = pedido.costoArticulos + pedido.costoEnvio;
+        let total = pedido.costoArticulos;
+        console.log("CHECKPOINT")
         pedido.costoTotal = total;
         pedido.pacientePedido = paciente._id;
         await pedido.save();
-        
+
         // Almacenamos el nombre del pedido en los pedidos del paciente
-        paciente.pedidospaciente.push(pedido.nombrePedido);
+        paciente.pedidosPaciente.push(pedido.nombrePedido);
         await paciente.save();
         res.json({ pedido });
     } catch (error) {
         console.log(error);
     }
+};
+
+export {
+    generarPedido
 };

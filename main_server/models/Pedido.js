@@ -1,22 +1,25 @@
 // Importamos Mongoose
 import mongoose from "mongoose";
 
+// Importamos el modelo de pacientes
+import Pacientes from "../models/Paciente.js"
+
 // Creación del esquema del documento embebido Detalles
 const detallesSchema = mongoose.Schema({
     _id : false,
-    nombreProducto: {
+    producto_P: {
         type: String,               //Dudas
         trim: true,
     },
-    cantidadProducto: {
+    cantidad_P: {
         type: Number,
         trim: true,
     },
-    totalParcialProducto: {
+    totalParcial_P: {
         type: Number,
         trim: true,
     },
-    imgProducto: {
+    img_P: {
         type: String,
         trim: true,
     }
@@ -31,7 +34,7 @@ const pedidoSchema = new mongoose.Schema({
     },
     pacientePedido: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Paciente",
+        ref: "Pacientes",
         trim: true
     },
     fechaPedido: {
@@ -49,14 +52,18 @@ const pedidoSchema = new mongoose.Schema({
     },
     totalArticulos: {
         type: Number,
-        required: true
+        trim: true,
+        default: 0
     },
     costoArticulos: {
         type: Number,
-        required: true
+        trim: true,
+        default: 0
     },
     costoTotal: {
         type: Number,
+        trim: true,
+        default: 0
     },
     isStarted: {
         type: Boolean
@@ -66,7 +73,6 @@ const pedidoSchema = new mongoose.Schema({
     },
     metodoPago: {
         type: String,
-        required: true,
         trim: true
     },
     detallesPedidos: {
@@ -76,5 +82,5 @@ const pedidoSchema = new mongoose.Schema({
 });
 
 //Creacion del modelo
-const Pedido = mongoose.model("Pedido". pedidoSchema);
-export default Producto;
+const Pedido = mongoose.model("Pedido", pedidoSchema);
+export default Pedido;
