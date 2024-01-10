@@ -1,10 +1,11 @@
 import Doctor from "../models/Doctor.js";
+import Paciente from "../models/Paciente.js";
 import Administrador from "../models/Administrador.js";
 import generarId from "../helpers/generarId.js";
 import generarJWT from "../helpers/generarJWT.js";
 import fs from "fs/promises";
 import path from "path";
-import { emailRegistro, emailRestablecer } from "../helpers/emails.js";
+import { emailRegistro, emailRestablecer, emailEstadoCita } from "../helpers/emails.js";
 import { cifrar, descifrar } from "../helpers/cifrar_descifrar.js";
 
 //Autenticacion, registro y confirmacion de Doctor
@@ -282,7 +283,7 @@ const modificarInformacion = async (req, res) => {
             doctor.surnameDoctor = cifrar(in_surnameDoctor);
         }
         // Reajustamos el usename
-        doctor.usernameDoctor = cifrar(`${descifrar(doctor.nameDoctor)} ${descifrar(doctor.usernameDoctor)}`);
+        doctor.usernameDoctor = cifrar(`${descifrar(doctor.nameDoctor)} ${descifrar(doctor.surnameDoctor)}`);
         if (in_telefonoDoctor !== "") {
             doctor.telefonoDoctor = cifrar(in_telefonoDoctor);
         }
@@ -310,6 +311,279 @@ const modificarInformacion = async (req, res) => {
     }
 };
 
+// Añadir horario
+const nuevoHorario = async (req, res) => {
+    // Autenticamos al usuario
+    let emailDoctor;
+    emailDoctor = req.doctor.emailDoctor;
+    const doctor = await Doctor.findOne({ emailDoctor });
+    // Verificamos una sesión de doctor activa
+    if (!doctor) {
+        const error = new Error("Este usuario no ha iniciado sesión.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté confirmada
+    if(doctor.isConfirmed == false){
+        const error = new Error("Esta cuenta no está confirmada.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté aceptada
+    if(doctor.isAccepted == false){
+        const error = new Error("Este doctor no está autorizado todavía.");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Leemos la información del JSON
+    const {
+        dia,
+        horaInicio,
+        horaFin
+    } = req.body;
+
+    try {
+        // Revisamos que el horario no esté registrado ya
+        const horarios = doctor.horariosAtencion;
+        console.log(horarios);
+        if (horarios.length != 0) {
+            for (let index = 0; index < horarios.length; index++) {
+                const element = horarios[index];
+                if (element.dia === dia && element.horaInicio === horaInicio && element.horaFin === horaFin) {
+                    return res.json({ msg: "Este horario ya está registrado." });
+                }
+            }
+        }
+
+        // Añadimos el nuevo horario a los horarios del doctor
+        doctor.horariosAtencion.push(req.body);
+
+        // Guardamos los datos
+        await doctor.save();
+        return res.json({ msg: "Se ha añadido el horario." });
+
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+// Remover horario
+const removerHorario = async (req, res) => {
+    // Autenticamos al usuario
+    let emailDoctor;
+    emailDoctor = req.doctor.emailDoctor;
+    const doctor = await Doctor.findOne({ emailDoctor });
+    // Verificamos una sesión de doctor activa
+    if (!doctor) {
+        const error = new Error("Este usuario no ha iniciado sesión.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté confirmada
+    if(doctor.isConfirmed == false){
+        const error = new Error("Esta cuenta no está confirmada.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté aceptada
+    if(doctor.isAccepted == false){
+        const error = new Error("Este doctor no está autorizado todavía.");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Leemos la información del JSON
+    const {
+        dia,
+        horaInicio,
+        horaFin
+    } = req.body;
+
+    try {
+        // Revisamos que exista el horario y eliminamos el horario
+        const horarios = doctor.horariosAtencion;
+        console.log(horarios);
+        if (horarios.length != 0) {
+            for (let index = 0; index < horarios.length; index++) {
+                const element = horarios[index];
+                if (element.dia === dia && element.horaInicio === horaInicio && element.horaFin === horaFin) {
+                    // Guardamos los datos
+                    doctor.horariosAtencion.pull(req.body);
+                    await doctor.save();
+                    return res.json({ msg: "Se ha eliminado el horario." });
+                }
+            }
+        }
+        
+        // Regresamos mensaje en caso de no haber eliminado nada
+        return res.json({ msg: "Este horario no existe." });
+
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+// Ver citas
+const verCitas = async (req, res) => {
+    // Autenticamos al usuario
+    let emailDoctor;
+    emailDoctor = req.doctor.emailDoctor;
+    const doctor = await Doctor.findOne({ emailDoctor });
+    // Verificamos una sesión de doctor activa
+    if (!doctor) {
+        const error = new Error("Este usuario no ha iniciado sesión.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté confirmada
+    if(doctor.isConfirmed == false){
+        const error = new Error("Esta cuenta no está confirmada.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté aceptada
+    if(doctor.isAccepted == false){
+        const error = new Error("Este doctor no está autorizado todavía.");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Retornamos un JSON con las citas del doctor
+    try {
+        const citas = doctor.citasDoctor
+        res.json(citas);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+// Procesar cita
+const procesarCita = async (req, res) => {
+    // Autenticamos al usuario
+    let emailDoctor;
+    emailDoctor = req.doctor.emailDoctor;
+    const doctor = await Doctor.findOne({ emailDoctor });
+    // Verificamos una sesión de doctor activa
+    if (!doctor) {
+        const error = new Error("Este usuario no ha iniciado sesión.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté confirmada
+    if(doctor.isConfirmed == false){
+        const error = new Error("Esta cuenta no está confirmada.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté aceptada
+    if(doctor.isAccepted == false){
+        const error = new Error("Este doctor no está autorizado todavía.");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Recuperamos el JSON de entrada
+    let {
+        emailPaciente,
+        estado
+    } = req.body;
+
+    try {
+        // Verificamos que el paciente exista
+        emailPaciente = cifrar(emailPaciente);
+        const paciente = await Paciente.findOne({emailPaciente});
+        if (!paciente) {
+            console.log(paciente)
+            const error = new Error("Este correo no está registrado");     //Confirmar mensaje
+            return res.status(404).json({msg: error.message});
+        }
+        emailPaciente = descifrar(emailPaciente);
+
+        // Buscamos al paciente en las citas
+        const citas = doctor.citasDoctor;
+        if (citas.length != 0) {
+            for (let index = 0; index < citas.length; index++) {
+                const element = citas[index];
+                if (element.pacienteEmail === cifrar(emailPaciente)) {
+                    break;
+                }
+                if (index == citas.length - 1) {
+                    return res.json({ msg: "Este paciente no tiene citas pendientes por gestionar." });
+                }
+            }
+        }
+
+        // Se acepta o rechaza la cita
+        console.log(paciente.emailPaciente);
+        const citaEncontrada = await Doctor.findOne({ 'citasDoctor.pacienteEmail': paciente.emailPaciente });
+
+        // Verificamos si se encontró la cita
+        if (!citaEncontrada || citaEncontrada.citasDoctor.length === 0) {
+            return res.json({ msg: "Este paciente no tiene citas pendientes por gestionar." });
+        }
+
+        // Accedemos al primer elemento del array de citasDoctor
+        const cita = citaEncontrada.citasDoctor[0];
+
+        // Accedemos a las propiedades del horario
+        const { dia, horaInicio, horaFin } = cita.horario;
+        const { fecha } = cita;
+
+        // Ahora puedes utilizar dia, horaInicio y horaFin según sea necesario
+        console.log(dia, horaInicio, horaFin);
+
+        // Movemos el paciente a segimiento si la cita fue aprobada y se la agregamos al paciente
+        if (estado) {
+            const cita_generada = {
+                horario: {
+                    dia: dia,
+                    horaInicio: horaInicio,
+                    horaFin: horaFin,
+                },
+                fecha: fecha,
+                pacienteEmail: paciente.emailPaciente,
+                estado: estado
+            }
+            doctor.listaSeguimiento.push(cifrar(paciente.emailPaciente));
+            paciente.citasPaciente.push(cita_generada);
+            doctor.citasDoctor.pull(citaEncontrada);
+            await doctor.save();
+            doctor.citasDoctor.push(cita_generada);
+            await doctor.save();
+        }
+        
+        // Removemos la cita si ésta fue rechazada
+        if (!estado) {
+            doctor.citasDoctor.pull(citaEncontrada);
+        }
+
+        // Guardamos la instancia actualizada en la base de datos
+        await doctor.save();
+        await paciente.save();
+
+        // Enviamos un correo al paciente para informarlo acerca de su cita
+        if (estado) {
+            emailEstadoCita({
+                email: descifrar(paciente.emailPaciente),
+                nombreDoctor: descifrar(doctor.usernameDoctor),
+                nombrePaciente: descifrar(paciente.usernamePaciente),
+                dia: dia,
+                fecha: fecha,
+                horaInicio: horaInicio,
+                horaFin: horaFin,
+                estado: "Aceptada"
+            });
+        }
+        else {
+            emailEstadoCita({
+                email: descifrar(paciente.emailPaciente),
+                nombreDoctor: descifrar(doctor.usernameDoctor),
+                nombrePaciente: descifrar(paciente.usernamePaciente),
+                dia: dia,
+                fecha: fecha,
+                horaInicio: horaInicio,
+                horaFin: horaFin,
+                estado: "Rechazada"
+            });
+        }
+
+        // Regresamos mensaje en caso de éxito
+        return res.json({ msg: "Se ha informado al paciente del estado de su cita." });
+
+    } catch (error) {
+        console.log(error);
+    }
+};
+
 export {
     registrarDoctor,
     loginDoctor,
@@ -318,5 +592,9 @@ export {
     olvidePassword,
     comprobarToken,
     nuevoPassword,
-    modificarInformacion
+    modificarInformacion,
+    nuevoHorario,
+    removerHorario,
+    verCitas,
+    procesarCita
 };

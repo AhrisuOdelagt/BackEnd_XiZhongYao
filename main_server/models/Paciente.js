@@ -30,7 +30,23 @@ const carritoComprasSchema = mongoose.Schema({
     }
 });
 
-//Modelo de paciente
+// Modelos para las citas
+const horariosSchema = mongoose.Schema({
+    _id : false,
+    dia: String,
+    horaInicio: String,
+    horaFin: String
+});
+
+const citasSchema = mongoose.Schema({
+    _id : false,
+    horario: horariosSchema,
+    fecha: String,
+    pacienteEmail: String,
+    estado: Boolean
+});
+
+// Modelo de paciente
 const pacienteSchema = mongoose.Schema({
     namePaciente: {
         type: String,
@@ -68,11 +84,11 @@ const pacienteSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    historialAnalisis: {
-        type: [String]        //Modificar en cuanto se tenga el modelo Analisis
+    historialAnalisis: {       //Modificar en cuanto se tenga el modelo Analisis
+        type: [String]
     },
     citasPaciente: {
-                            //INVESTIGAR
+        type: [citasSchema]
     },
     pedidosPaciente: {  
         type: [String],

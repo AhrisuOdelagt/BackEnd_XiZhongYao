@@ -10,10 +10,25 @@ const archivosSchema = mongoose.Schema({
     datos: Buffer,
 });
   
-  const documentosSchema = mongoose.Schema({
+const documentosSchema = mongoose.Schema({
     _id : false,
     tituloDoctor: archivosSchema,
     cedulaDoctor: archivosSchema,
+});
+
+const horariosSchema = mongoose.Schema({
+    _id : false,
+    dia: String,
+    horaInicio: String,
+    horaFin: String
+});
+
+const citasSchema = mongoose.Schema({
+    _id : false,
+    horario: horariosSchema,
+    fecha: String,
+    pacienteEmail: String,
+    estado: Boolean
 });
 
 //Modelo de Doctor
@@ -69,16 +84,13 @@ const doctorSchema = mongoose.Schema({
         required: true
     },
     listaSeguimiento: {
-                                //Modificar en cuanto se tenga modelo Pacientes
+        type: [String]
     },
     horariosAtencion: {
-                                //Modificar en cuanto se tenga modelo Semana
-    },
-    citasPendientes:{
-                                //Modificar en cuanto se tenga modelo Semana
+        type: [horariosSchema]
     },
     citasDoctor: {
-                                //Modificar en cuanto se tenga modelo Semana
+        type: [citasSchema]
     },
     documentos: {
         type: documentosSchema
