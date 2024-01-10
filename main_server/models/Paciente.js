@@ -2,6 +2,33 @@
 import mongoose from "mongoose";
 // Importamos bcrypt para aplicar Hash a las contraseñas
 import bcrypt from "bcrypt";
+// Importamos el modelo de los pedidos
+import Pedido from "./Pedido.js";
+
+// Creación del esquema del documento embebido CarritoCompras
+const carritoComprasSchema = mongoose.Schema({
+    _id : false,
+    producto_C: {
+        type: String,
+        trim: true,
+    },
+    cantidad_C: {
+        type: Number,
+        trim: true,
+    },
+    totalParcial_C: {
+        type: Number,
+        trim: true,
+    },
+    copiaInv_C: {
+        type: Number,
+        trim: true
+    },
+    img_C: {
+        type: String,
+        trim: true
+    }
+});
 
 // Modelos para las citas
 const horariosSchema = mongoose.Schema({
@@ -57,24 +84,24 @@ const pacienteSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    historialAnalisis: {
+    historialAnalisis: {       //Modificar en cuanto se tenga el modelo Analisis
         type: [String]
     },
     citasPaciente: {
         type: [citasSchema]
     },
     pedidosPaciente: {  
-        type: [String],     //Modificar en cuanto se tenga el modelo Pedidos
+        type: [String],
         trim: true
     },
     carritoCompras: {
-                            //Modificar en cuanto se tenga el modelo Carrito  
+        type: [carritoComprasSchema],
     },
     tokenPaciente: {
         type: String,
         trim: true 
     } 
-})
+});
 
 // Aplicamos un Hash a la contraseña antes de guardarla en la base de datos
 pacienteSchema.pre("save", async function(next){
