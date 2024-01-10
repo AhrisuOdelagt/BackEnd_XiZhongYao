@@ -26,6 +26,7 @@ const horariosSchema = mongoose.Schema({
 const citasSchema = mongoose.Schema({
     _id : false,
     horario: horariosSchema,
+    fecha: String,
     pacienteEmail: String,
     estado: Boolean
 });

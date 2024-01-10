@@ -58,7 +58,7 @@ const emailRestablecer = async (datos) => {
 
 // Email para la modificación de contraseña
 const emailSolicitarCita = async (datos) => {
-  const {email, nombreDoctor, nombrePaciente, dia, horaInicio, horaFin} = datos;
+  const {email, nombreDoctor, nombrePaciente, fecha, dia, horaInicio, horaFin} = datos;
 
   const transport = nodemailer.createTransport({
       host: process.env.MASTER_H,
@@ -78,7 +78,7 @@ const emailSolicitarCita = async (datos) => {
       html: `
       <p>Buen día, doctor ${nombreDoctor}.</p>
       <p>Se le envía la notificación de que el paciente ${nombrePaciente} desea solicitar una cita con usted.</p>
-      <p>Los detalles de la cita son los siguientes:</p>
+      <p>Los detalles de la cita con fecha ${fecha} son los siguientes:</p>
       <p>Día: ${dia}</p>
       <p>Hora de inicio: ${horaInicio}</p>
       <p>Hora de término: ${horaFin}</p>
@@ -90,7 +90,7 @@ const emailSolicitarCita = async (datos) => {
 
 // Email para la modificación de contraseña
 const emailEstadoCita = async (datos) => {
-  const {email, nombreDoctor, nombrePaciente, dia, horaInicio, horaFin, estado} = datos;
+  const {email, nombreDoctor, nombrePaciente, fecha, dia, horaInicio, horaFin, estado} = datos;
 
   const transport = nodemailer.createTransport({
       host: process.env.MASTER_H,
@@ -110,7 +110,7 @@ const emailEstadoCita = async (datos) => {
       html: `
       <p>Buen día, ${nombrePaciente}.</p>
       <p>Se le envía la notificación de que el doctor ${nombreDoctor} a procesó su cita.</p>
-      <p>Los detalles de la cita son los siguientes:</p>
+      <p>Los detalles de la cita con fecha ${fecha} son los siguientes:</p>
       <p>Día: ${dia}</p>
       <p>Hora de inicio: ${horaInicio}</p>
       <p>Hora de término: ${horaFin}</p>

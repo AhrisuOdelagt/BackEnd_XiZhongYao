@@ -176,6 +176,7 @@ const generarCita = async (req, res) => {
     // Obtenemos los parámetros JSON
     let {
         emailDoctor,
+        fecha,
         dia,
         horaInicio,
         horaFin
@@ -215,7 +216,8 @@ const generarCita = async (req, res) => {
                 const element = citasDoctor[index];
                 if (element.horario.dia === dia
                     && element.horario.horaInicio === horaInicio
-                    && element.horario.horaFin === horaFin) {
+                    && element.horario.horaFin === horaFin
+                    && element.fecha === fecha) {
                         return res.json({ msg: "Este horario ya está ocupado." });
                 }
             }
@@ -228,6 +230,7 @@ const generarCita = async (req, res) => {
                 horaInicio: horaInicio,
                 horaFin: horaFin
             },
+            fecha: fecha,
             pacienteEmail: paciente.emailPaciente
         }
         doctor.citasDoctor.push(cita);
@@ -239,6 +242,7 @@ const generarCita = async (req, res) => {
             email: descifrar(doctor.emailDoctor),
             nombreDoctor: descifrar(doctor.usernameDoctor),
             nombrePaciente: descifrar(paciente.usernamePaciente),
+            fecha: fecha,
             dia: dia,
             horaInicio: horaInicio,
             horaFin: horaFin

@@ -516,6 +516,7 @@ const procesarCita = async (req, res) => {
 
         // Accedemos a las propiedades del horario
         const { dia, horaInicio, horaFin } = cita.horario;
+        const { fecha } = cita;
 
         // Ahora puedes utilizar dia, horaInicio y horaFin según sea necesario
         console.log(dia, horaInicio, horaFin);
@@ -528,6 +529,7 @@ const procesarCita = async (req, res) => {
                     horaInicio: horaInicio,
                     horaFin: horaFin,
                 },
+                fecha: fecha,
                 pacienteEmail: paciente.emailPaciente,
                 estado: estado
             }
@@ -555,6 +557,7 @@ const procesarCita = async (req, res) => {
                 nombreDoctor: descifrar(doctor.usernameDoctor),
                 nombrePaciente: descifrar(paciente.usernamePaciente),
                 dia: dia,
+                fecha: fecha,
                 horaInicio: horaInicio,
                 horaFin: horaFin,
                 estado: "Aceptada"
@@ -566,6 +569,7 @@ const procesarCita = async (req, res) => {
                 nombreDoctor: descifrar(doctor.usernameDoctor),
                 nombrePaciente: descifrar(paciente.usernamePaciente),
                 dia: dia,
+                fecha: fecha,
                 horaInicio: horaInicio,
                 horaFin: horaFin,
                 estado: "Rechazada"
