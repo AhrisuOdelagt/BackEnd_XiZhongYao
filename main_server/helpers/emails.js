@@ -109,7 +109,7 @@ const emailEstadoCita = async (datos) => {
       text: `El doctor ${nombreDoctor} ya ha procesado su solicitud de cita.`,
       html: `
       <p>Buen día, ${nombrePaciente}.</p>
-      <p>Se le envía la notificación de que el doctor ${nombreDoctor} a procesó su cita.</p>
+      <p>Se le envía la notificación de que el doctor ${nombreDoctor} ya procesó su cita.</p>
       <p>Los detalles de la cita con fecha ${fecha} son los siguientes:</p>
       <p>Día: ${dia}</p>
       <p>Hora de inicio: ${horaInicio}</p>

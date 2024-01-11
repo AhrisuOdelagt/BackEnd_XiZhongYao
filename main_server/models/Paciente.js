@@ -46,6 +46,23 @@ const citasSchema = mongoose.Schema({
     estado: Boolean
 });
 
+// Creación del esquema del documento embebido Tarjeta
+const tarjetaSchema = mongoose.Schema({
+    _id : false,
+    numTarjeta: {
+        type: String,
+        trim: true,
+    },
+    fechaVencimiento: {
+        type: String,
+        trim: true,
+    },
+    titularTarjeta: {
+        type: String,
+        trim: true,
+    },
+});
+
 // Modelo de paciente
 const pacienteSchema = mongoose.Schema({
     namePaciente: {
@@ -96,6 +113,9 @@ const pacienteSchema = mongoose.Schema({
     },
     carritoCompras: {
         type: [carritoComprasSchema],
+    },
+    tarjetaPaciente: {
+        type: [tarjetaSchema],
     },
     tokenPaciente: {
         type: String,

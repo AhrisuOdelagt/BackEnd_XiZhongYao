@@ -25,6 +25,23 @@ const detallesSchema = mongoose.Schema({
     }
 });
 
+// Creación del esquema del documento embebido Tarjeta de Pago
+const tarjetaPagoSchema = mongoose.Schema({
+    _id : false,
+    numTarjeta_P: {
+        type: String,
+        trim: true,
+    },
+    fechaVencimiento_P: {
+        type: String,
+        trim: true,
+    },
+    cvv_P: {
+        type: String,
+        trim: true,
+    }
+});
+
 //Modelo pedidos
 const pedidoSchema = new mongoose.Schema({
     nombrePedido: {
@@ -68,6 +85,10 @@ const pedidoSchema = new mongoose.Schema({
     isStarted: {
         type: Boolean
     },
+    isPaid: {
+        type: Boolean,
+        default: false
+    },
     isFinished: {
         type: Boolean
     },
@@ -77,6 +98,9 @@ const pedidoSchema = new mongoose.Schema({
     },
     detallesPedidos: {
         type: [detallesSchema]
+    },
+    tarjetaPedido: {
+        type: tarjetaPagoSchema
     }
 
 });

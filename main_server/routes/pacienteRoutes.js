@@ -2,24 +2,23 @@ import express from "express";
 import checkAuthPaciente from "../middleware/checkAuthPaciente.js";
 const router = express.Router();
 
-import { registrarPaciente, 
-    loginPaciente, 
+import { registrarPaciente,
+    loginPaciente,
     confirmarPaciente, 
-    comprobarToken, 
     olvidePassword,
+    comprobarToken,
     nuevoPassword,
     agregarProductoCarrito,
-    incrementarProductoCarrito, 
+    incrementarProductoCarrito,
     decrementarProductoCarrito,
-    eliminarProductoCarrito,
-    vaciarCarrito,
+    eliminarProductoCarrito, 
+    vaciarCarrito, 
     visualizarCarrito,
     verHistorialPedidos,
     generarCita,
-    verDoctores } from "../controllers/pacienteController.js";
-
-import checkAuthPaciente from "../middleware/checkAuthPaciente.js";
-
+    verDoctores,
+    agregarTarjeta,
+    eliminarTarjeta } from "../controllers/pacienteController.js";
 
 //Registro, login y confirmar Paciente
 router.post("/", registrarPaciente)
@@ -43,5 +42,9 @@ router.get("main/pedido/visualizar-pedido", checkAuthPaciente, verHistorialPedid
 // Gestionar citas
 router.post("/main/generar-cita", checkAuthPaciente, generarCita);
 router.get("/main/ver-doctores", checkAuthPaciente, verDoctores);
+
+// Tarjetas
+router.post("/main/agregar-tarjeta", checkAuthPaciente, agregarTarjeta);
+router.delete("/main/eliminar-tarjeta/:numTarjeta", checkAuthPaciente, eliminarTarjeta);
 
 export default router;

@@ -278,12 +278,13 @@ const verDoctores = async (req, res) => {
     // Mostramos en un JSON todos los doctores
     try {
         // Conseguimos la información de los doctores
-        const doctores = await Doctor.find({}, { emailDoctor: 1, usernameDoctor: 1, _id: 0 });
+        const doctores = await Doctor.find({}, { emailDoctor: 1, usernameDoctor: 1, especialidad: 1, _id: 0 });
 
         // Ajustamos la información para sólo mostrar emails y usernames
         const infoDoctores = doctores.map(doctor => ({
             emailDoctor: descifrar(doctor.emailDoctor),
-            usernameDoctor: descifrar(doctor.usernameDoctor)
+            usernameDoctor: descifrar(doctor.usernameDoctor),
+            especialidad: doctor.especialidad
         }));
 
         // Devolvemos la información en un JSON
@@ -634,6 +635,66 @@ const verHistorialPedidos = async (req, res) => {
     }
 }
 
+// Agregar tarjeta
+const agregarTarjeta = async (req, res) => {
+    // Realizamos validación del paciente
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    if(!paciente){
+        const error = new Error("Este usuario no ha iniciado sesión"); /* Mensaje faltante */
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Realizamos la operación
+    try {
+        // Almacenamos y guardamos la nueva tarjeta
+        paciente.tarjetaPaciente.push(req.body);
+        await paciente.save();
+
+        //Enviamos un mensaje de éxito
+        return res.json({ msg: "Se ha añadido la tarjeta." });
+
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+// Eliminar tarjeta
+const eliminarTarjeta = async (req, res) => {
+    // Realizamos validación del paciente
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    if(!paciente){
+        const error = new Error("Este usuario no ha iniciado sesión");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Realizamos la operación
+    try {
+        // Modificamos el contenido de la tarjeta
+        const { numTarjeta } = req.params;
+        const tarjetaEncontrada = paciente.tarjetaPaciente.find(tarjeta => tarjeta.numTarjeta === numTarjeta);
+        
+        if (tarjetaEncontrada) {
+            paciente.tarjetaPaciente.pull(tarjetaEncontrada);
+            // Guardamos los cambios
+            await paciente.save();
+            // Enviamos un mensaje de confirmación
+            return res.json({ msg: "Se ha eliminado la tarjeta." });
+        } else {
+            // Si no se encuentra la tarjeta, enviamos un mensaje de error
+            return res.status(404).json({ msg: "No se encontró la tarjeta." });
+        }
+
+    } catch (error) {
+        console.log(error);
+        // Manejar el error adecuadamente
+        return res.status(500).json({ msg: "Error interno del servidor." });
+    }
+};
+
 export {
     registrarPaciente,
     loginPaciente,
@@ -647,7 +708,9 @@ export {
     eliminarProductoCarrito, 
     vaciarCarrito, 
     visualizarCarrito,
-    verHistorialPedidos
+    verHistorialPedidos,
     generarCita,
-    verDoctores
+    verDoctores,
+    agregarTarjeta,
+    eliminarTarjeta
 };
