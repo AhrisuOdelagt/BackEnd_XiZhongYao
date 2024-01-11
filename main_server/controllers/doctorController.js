@@ -584,6 +584,93 @@ const procesarCita = async (req, res) => {
     }
 };
 
+const consultarDoctor = async (req, res) => {
+
+    //Validamos al Admin
+    let emailAdmin;
+    emailAdmin = req.administrador.emailAdmin;
+    const admin = await Administrador.findOne({emailAdmin})
+
+    if(!admin){
+        const error = new Error("Este usuario no ha iniciado sesion");
+        return res.status(403).json({msg: error.message});
+    }
+
+    if(admin.isAdmin == false){
+        const error = new Error("Este usuario no esta autorizado")
+        return res.status(403).json({msg: error.message})
+    }
+
+    try{
+        let {usernameDoctor} = req.params;
+        const doctor = await Doctor.findOne({usernameDoctor});
+        if(!doctor) {
+            const error = new Error("El doctor no esta registrado.")
+            return res.status(404).json({msg: error.message});
+        }
+        res.json(doctor);
+    } catch(error){
+        console.log(error);
+    }
+    
+}
+
+const consultarDoctores = async (req, res) => {
+    //Validamos al Admin
+    let emailAdmin;
+    emailAdmin = req.administrador.emailAdmin;
+    const admin = await Administrador.findOne({emailAdmin})
+
+    if(!admin){
+        const error = new Error("Este usuario no ha iniciado sesion");
+        return res.status(403).json({msg: error.message});
+    }
+
+    if(admin.isAdmin == false){
+        const error = new Error("Este usuario no esta autorizado")
+        return res.status(403).json({msg: error.message})
+    }
+
+    try{
+        const docs = await Doctor.find();
+        res.json({doctores: docs})
+    } catch(error){
+        console.log(error);
+    }
+}
+
+const eliminarDoctor = async (req, res) => {
+
+    //Validamos al Admin
+    let emailAdmin;
+    emailAdmin = req.administrador.emailAdmin;
+    const admin = await Administrador.findOne({emailAdmin})
+
+    if(!admin){
+        const error = new Error("Este usuario no ha iniciado sesion");
+        return res.status(403).json({msg: error.message});
+    }
+
+    if(admin.isAdmin == false){
+        const error = new Error("Este usuario no esta autorizado")
+        return res.status(403).json({msg: error.message})
+    }
+
+    try{
+        let {usernameDoctor} = req.params;
+        const doctor = await Doctor.findOne({usernameDoctor});
+        if(!doctor) {
+            const error = new Error("El doctor no esta registrado.")
+            return res.status(404).json({msg: error.message});
+        }
+
+        await doctor.deleteOne();
+        res.json({msg: "Doctor eliminado"})
+    } catch(error){
+        console.log(error);
+    }
+}
+
 export {
     registrarDoctor,
     loginDoctor,
@@ -596,5 +683,8 @@ export {
     nuevoHorario,
     removerHorario,
     verCitas,
-    procesarCita
+    procesarCita,
+    consultarDoctor,
+    consultarDoctores,
+    eliminarDoctor
 };

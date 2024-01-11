@@ -2,6 +2,7 @@ import Paciente from "../models/Paciente.js";
 import Producto from "../models/Producto.js";
 import Pedido from "../models/Pedido.js";
 import Doctor from "../models/Doctor.js";
+import Administrador from "../models/Administrador.js";
 import generarId from "../helpers/generarId.js";
 import generarJWT from "../helpers/generarJWT.js";
 import { emailRegistro, emailRestablecer, emailSolicitarCita } from "../helpers/emails.js";
@@ -634,6 +635,94 @@ const verHistorialPedidos = async (req, res) => {
     }
 }
 
+const consultarPaciente = async (req, res) => {
+
+    //Validamos al Admin
+    let emailAdmin;
+    emailAdmin = req.administrador.emailAdmin;
+    const admin = await Administrador.findOne({emailAdmin})
+
+    if(!admin){
+        const error = new Error("Este usuario no ha iniciado sesion");
+        return res.status(403).json({msg: error.message});
+    }
+
+    if(admin.isAdmin == false){
+        const error = new Error("Este usuario no esta autorizado")
+        return res.status(403).json({msg: error.message})
+    }
+
+    try{
+        let {usernamePaciente} = req.params;
+        const pac = await Paciente.findOne({usernamePaciente});
+        if(!pac) {
+            const error = new Error("El paciente no esta registrado.")
+            return res.status(404).json({msg: error.message});
+        }
+        res.json(pac);
+    } catch(error){
+        console.log(error);
+    }
+    
+}
+
+const consultarPacientes = async (req, res) => {
+    //Validamos al Admin
+    let emailAdmin;
+    emailAdmin = req.administrador.emailAdmin;
+    const admin = await Administrador.findOne({emailAdmin})
+
+    if(!admin){
+        const error = new Error("Este usuario no ha iniciado sesion");
+        return res.status(403).json({msg: error.message});
+    }
+
+    if(admin.isAdmin == false){
+        const error = new Error("Este usuario no esta autorizado")
+        return res.status(403).json({msg: error.message})
+    }
+
+    try{
+        const pacs = await Paciente.find();
+        //Desencriptar la informacion
+        res.json({pacientes: pacs})
+    } catch(error){
+        console.log(error);
+    }
+}
+
+const eliminarPaciente = async (req, res) => {
+
+    //Validamos al Admin
+    let emailAdmin;
+    emailAdmin = req.administrador.emailAdmin;
+    const admin = await Administrador.findOne({emailAdmin})
+
+    if(!admin){
+        const error = new Error("Este usuario no ha iniciado sesion");
+        return res.status(403).json({msg: error.message});
+    }
+
+    if(admin.isAdmin == false){
+        const error = new Error("Este usuario no esta autorizado")
+        return res.status(403).json({msg: error.message})
+    }
+
+    try{
+        let {usernamePaciente} = req.params;
+        const pac = await Paciente.findOne({usernamePaciente});
+        if(!pac) {
+            const error = new Error("El paciente no esta registrado.")
+            return res.status(404).json({msg: error.message});
+        }
+
+        await pac.deleteOne();
+        res.json({msg: "Paciente eliminado"})
+    } catch(error){
+        console.log(error);
+    }
+}
+
 export {
     registrarPaciente,
     loginPaciente,
@@ -647,7 +736,10 @@ export {
     eliminarProductoCarrito, 
     vaciarCarrito, 
     visualizarCarrito,
-    verHistorialPedidos
+    verHistorialPedidos,
     generarCita,
-    verDoctores
+    verDoctores,
+    consultarPacientes,
+    consultarPaciente,
+    eliminarPaciente
 };

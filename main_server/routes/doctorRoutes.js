@@ -15,7 +15,10 @@ import  {
         nuevoHorario,
         removerHorario,
         verCitas,
-        procesarCita
+        procesarCita,
+        consultarDoctores,
+        consultarDoctor,
+        eliminarDoctor
         } from "../controllers/doctorController.js";
 
 //Registro, login y confirmar Doctores
@@ -35,5 +38,12 @@ router.delete("/main/eliminar-horario", checkAuthDoctor, removerHorario);
 router.get("/main/ver-citas", checkAuthDoctor, verCitas);
 // Procesar citas
 router.post("/main/procesar-citas", checkAuthDoctor, procesarCita);
+//Consultar doctores
+router.get("/consultarDoctores", checkAuthAdmin, consultarDoctores);
+//Consultar doctor
+router.get("/consultarDoctor/:usernameDoctor", checkAuthAdmin, consultarDoctor)
+//Eliminar doctor
+router.delete("/eliminarDoctor/:usernameDoctor", checkAuthAdmin, eliminarDoctor)
+
 
 export default router;

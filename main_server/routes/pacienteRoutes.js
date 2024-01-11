@@ -1,5 +1,6 @@
 import express from "express";
 import checkAuthPaciente from "../middleware/checkAuthPaciente.js";
+import checkAuthAdmin from "../middleware/checkAuthAdmin.js";
 const router = express.Router();
 
 import { registrarPaciente, 
@@ -16,9 +17,10 @@ import { registrarPaciente,
     visualizarCarrito,
     verHistorialPedidos,
     generarCita,
-    verDoctores } from "../controllers/pacienteController.js";
-
-import checkAuthPaciente from "../middleware/checkAuthPaciente.js";
+    verDoctores, 
+    consultarPacientes,
+    consultarPaciente,
+    eliminarPaciente} from "../controllers/pacienteController.js";
 
 
 //Registro, login y confirmar Paciente
@@ -43,5 +45,12 @@ router.get("main/pedido/visualizar-pedido", checkAuthPaciente, verHistorialPedid
 // Gestionar citas
 router.post("/main/generar-cita", checkAuthPaciente, generarCita);
 router.get("/main/ver-doctores", checkAuthPaciente, verDoctores);
+
+//Consultar pacientes
+router.get("/consultarPacientes", checkAuthAdmin, consultarPacientes);
+//Consultar paciente
+router.get("/consultarPaciente/:usernamePaciente", checkAuthAdmin, consultarPaciente);
+//Eliminar paciente
+router.delete("/eliminarPaciente/:usernamePaciente", checkAuthAdmin, eliminarPaciente);
 
 export default router;
