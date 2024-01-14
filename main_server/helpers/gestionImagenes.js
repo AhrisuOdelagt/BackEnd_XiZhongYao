@@ -20,6 +20,26 @@ async function uploadImg(path, product){
     }
 }
 
+// Inserción de imágenes (Doctor)
+async function uploadImgDoc(path, doctor){
+    try {
+        const result = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload(path, async (error, result) => {
+                if(error){
+                    reject(error);
+                }
+                else{
+                    resolve(result);
+                    // Agregar el public_id al string de imágenes del producto
+                    doctor.imagenDoctor = result.public_id;
+                }
+            });
+        });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 // Eliminar imágenes
 async function removeImage(publicId) {
     try {
@@ -31,5 +51,6 @@ async function removeImage(publicId) {
 
 export {
     uploadImg,
-    removeImage
+    removeImage,
+    uploadImgDoc
 }

@@ -63,6 +63,66 @@ const tarjetaSchema = mongoose.Schema({
     },
 });
 
+const analisisSchema = mongoose.Schema({
+    _id : false,
+    nombreAnalisis: {
+        type: String,
+        trim: true
+    },
+    fechaAnalisis: {
+        type: Date,
+        default: () => new Date()
+    },
+    glucosa: {
+        type: String,
+        trim: true
+    },
+    urea: {
+        type: String,
+        trim: true
+    },
+    creatinina: {
+        type: String,
+        trim: true
+    },
+    acidoUrico: {
+        type: String,
+        trim: true
+    },
+    colTotal: {
+        type: String,
+        trim: true
+    },
+    colLDL: {
+        type: String,
+        trim: true
+    },
+    colHDL: {
+        type: String,
+        trim: true
+    },
+    trigliceridos: {
+        type: String,
+        trim: true
+    },
+    bilirrubina: {
+        type: String,
+        trim: true
+    },
+    tgo: {
+        type: String,
+        trim: true
+    },
+    tgp: {
+        type: String,
+        trim: true
+    },
+    ggt: {
+        type: String,
+        trim: true
+    },
+});
+
 // Modelo de paciente
 const pacienteSchema = mongoose.Schema({
     namePaciente: {
@@ -102,7 +162,7 @@ const pacienteSchema = mongoose.Schema({
         default: false
     },
     historialAnalisis: {       //Modificar en cuanto se tenga el modelo Analisis
-        type: [String]
+        type: [analisisSchema]
     },
     citasPaciente: {
         type: [citasSchema]

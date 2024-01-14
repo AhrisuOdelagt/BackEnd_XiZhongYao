@@ -7,6 +7,9 @@ import fs from "fs/promises";
 import path from "path";
 import { emailRegistro, emailRestablecer, emailEstadoCita } from "../helpers/emails.js";
 import { cifrar, descifrar } from "../helpers/cifrar_descifrar.js";
+import { removeImage,
+    uploadImg,
+uploadImgDoc } from "../helpers/gestionImagenes.js";
 
 //Autenticacion, registro y confirmacion de Doctor
 const registrarDoctor = async (req, res) => {
@@ -269,6 +272,8 @@ const modificarInformacion = async (req, res) => {
         in_surnameDoctor,
         in_telefonoDoctor,
         in_especialidad,
+        in_descripcionDoctor,
+        in_imagenDoctor,
         pathCedula,
         in_direccion,
         in_direccion_maps
@@ -289,6 +294,15 @@ const modificarInformacion = async (req, res) => {
         }
         if (in_especialidad !== "") {
             doctor.especialidad = in_especialidad;
+        }
+        if (in_descripcionDoctor !== "") {
+            doctor.descripcionDoctor = in_descripcionDoctor;
+        }
+        if (in_imagenDoctor !== "") {
+            if (doctor.imagenDoctor) {
+                await removeImage(doctor.imagenDoctor);
+            }
+            await uploadImgDoc(in_imagenDoctor, doctor);
         }
         if (in_direccion !== "") {
             doctor.direccion = cifrar(in_direccion);

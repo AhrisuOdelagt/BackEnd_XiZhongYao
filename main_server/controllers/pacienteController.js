@@ -278,13 +278,15 @@ const verDoctores = async (req, res) => {
     // Mostramos en un JSON todos los doctores
     try {
         // Conseguimos la información de los doctores
-        const doctores = await Doctor.find({}, { emailDoctor: 1, usernameDoctor: 1, especialidad: 1, _id: 0 });
+        const doctores = await Doctor.find({}, { emailDoctor: 1, usernameDoctor: 1, especialidad: 1, descripcionDoctor: 1, imagenDoctor: 1, _id: 0 });
 
         // Ajustamos la información para sólo mostrar emails y usernames
         const infoDoctores = doctores.map(doctor => ({
             emailDoctor: descifrar(doctor.emailDoctor),
             usernameDoctor: descifrar(doctor.usernameDoctor),
-            especialidad: doctor.especialidad
+            especialidad: doctor.especialidad,
+            descripcionDoctor: doctor.descripcionDoctor,
+            imagenDoctor: doctor.imagenDoctor
         }));
 
         // Devolvemos la información en un JSON
@@ -695,6 +697,254 @@ const eliminarTarjeta = async (req, res) => {
     }
 };
 
+// Ver tarjetas
+const verTarjetas = async (req, res) => {
+    // Realizamos validación del paciente
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    if(!paciente){
+        const error = new Error("Este usuario no ha iniciado sesión");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Realizamos la operación
+    try {
+        // Regresamos las tarjetas
+        return res.json({ Tarjetas: paciente.tarjetaPaciente })
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+// Ver citas
+const verCitas = async (req, res) => {
+    // Realizamos validación del paciente
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    if(!paciente){
+        const error = new Error("Este usuario no ha iniciado sesión");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Realizamos la operación
+    try {
+        // Regresamos las citas
+        return res.json({ Citas: paciente.citasPaciente });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+// Ver Pedidos
+const verPedidos = async (req, res) => {
+    // Realizamos validación del paciente
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    if(!paciente){
+        const error = new Error("Este usuario no ha iniciado sesión");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Revisamos la longitud del arreglo de Pedidos
+    if(paciente.pedidosPaciente < 1){
+        const error = new Error("Sin pedidos");
+        return res.status(404).json({msg: error.message});
+    }
+
+    // Realizamos la operación
+    try {
+        // Revisamos y buscamos la información de todos los pedidos del cliente
+        const pedidos = paciente.pedidosPaciente;
+        let documentos = [];
+        for (let index = 0; index < pedidos.length; index++) {
+            let nombrePedido = pedidos[index];
+            let pedido = await Pedido.findOne({ nombrePedido });
+            documentos.push(pedido);
+        }
+        return res.json({ pedidosPaciente: documentos });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+// Ver análisis
+const verAnalisis = async (req, res) => {
+    // Realizamos validación del paciente
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    if(!paciente){
+        const error = new Error("Este usuario no ha iniciado sesión");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Revisamos la longitud del arreglo de Pedidos
+    if(paciente.historialAnalisis < 1){
+        const error = new Error("Sin análisis");
+        return res.status(404).json({msg: error.message});
+    }
+
+    // Realizamos la operación
+    try {
+        return res.json({ analisis: paciente.historialAnalisis });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+// Agregar Análisis
+const agregarAnalisis = async (req, res) => {
+    // Realizamos validación del paciente
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    if(!paciente){
+        const error = new Error("Este usuario no ha iniciado sesión");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Leemos el JSON de entrada
+    const {
+        glucosa,
+        urea,
+        creatinina,
+        acidoUrico,
+        colTotal,
+        colLDL,
+        colHDL,
+        trigliceridos,
+        bilirrubina,
+        tgo,
+        tgp,
+        ggt
+    } = req.body;
+
+    // Realizamos la operación
+    try {
+        const nombre = `${paciente.usernamePaciente}_${Date.now().toString()}`;
+        // Generamos la instancia
+        const nuevoAnalisis = {
+            nombreAnalisis: nombre,
+            glucosa: glucosa,
+            urea: urea,
+            creatinina: creatinina,
+            acidoUrico: acidoUrico,
+            colTotal: colTotal,
+            colLDL: colLDL,
+            colHDL: colHDL,
+            trigliceridos: trigliceridos,
+            bilirrubina: bilirrubina,
+            tgo: tgo,
+            tgp: tgp,
+            ggt: ggt
+        };
+        paciente.historialAnalisis.push(nuevoAnalisis);
+        await paciente.save();
+        return res.json({ msg: "Se ha guardado el análisis." })
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+const verProductosPaciente = async (req, res) => {
+    // Realizamos validación del paciente
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    if(!paciente){
+        const error = new Error("Este usuario no ha iniciado sesión");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Realizamos la operación
+    try {
+        const documentos = await Producto.find();
+        res.json({ productos: documentos });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+const cancelarCita = async (req, res) => {
+    // Realizamos validación del paciente
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    if(!paciente){
+        const error = new Error("Este usuario no ha iniciado sesión");
+        return res.status(403).json({msg: error.message});
+    }
+
+    // Leemos el JSON de entrada
+    let {
+        emailDoctor,
+        fecha
+    } = req.body;
+
+    try {
+        // Revisamos que el doctor exista
+        emailDoctor = cifrar(emailDoctor);
+        const doctor = await Doctor.findOne({ emailDoctor });
+        emailDoctor = descifrar(emailDoctor);
+
+        // Retornamos mensaje si el doctor no existe
+        if (!doctor) {
+            return res.json({ msg: "Este doctor no existe o no está registrado." });
+        }
+
+        // Revisar que el doctor tenga al paciente en seguimiento
+        const pacientesSeg = doctor.listaSeguimiento;
+        for (let index = 0; index < pacientesSeg.length; index++) {
+            const element = pacientesSeg[index];
+            if (index == pacientesSeg.length) {
+                return res.json({msg: "La cita no existe"});
+            }
+        }
+
+        // Eliminamos la información de la cita de todas partes
+        for (let index = 0; index < pacientesSeg.length; index++) {
+            const element = pacientesSeg[index];
+            if (element === paciente.usernamePaciente) {
+                doctor.listaSeguimiento.pull(element);
+            }
+        }
+
+        // Paciente
+        const citasP = paciente.citasPaciente;
+        for (let index = 0; index < citasP.length; index++) {
+            const element = citasP[index];
+            if (element.pacienteEmail === paciente.emailPaciente
+                && element.fecha === fecha) {
+                paciente.citasPaciente.pull(element);
+            }
+        }
+
+        await paciente.save();
+
+        // Doctor
+        const citasD = doctor.citasDoctor;
+        for (let index = 0; index < citasD.length; index++) {
+            const element = citasD[index];
+            if (element.pacienteEmail === paciente.emailPaciente
+                && element.fecha === fecha) {
+                    doctor.citasDoctor.pull(element);
+            }
+        }
+
+        await doctor.save();
+
+        // Regresamos un mensaje de confirmación
+        return res.json({ msg: "Se ha cancelado la cita" });
+
+    } catch (error) {
+        console.log(error);
+    }
+
+};
+
 export {
     registrarPaciente,
     loginPaciente,
@@ -712,5 +962,12 @@ export {
     generarCita,
     verDoctores,
     agregarTarjeta,
-    eliminarTarjeta
+    eliminarTarjeta,
+    verTarjetas,
+    verCitas,
+    verPedidos,
+    verAnalisis,
+    agregarAnalisis,
+    verProductosPaciente,
+    cancelarCita
 };

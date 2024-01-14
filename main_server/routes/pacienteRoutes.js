@@ -18,7 +18,14 @@ import { registrarPaciente,
     generarCita,
     verDoctores,
     agregarTarjeta,
-    eliminarTarjeta } from "../controllers/pacienteController.js";
+    eliminarTarjeta,
+    verTarjetas,
+    verCitas,
+    verPedidos,
+    verAnalisis,
+    agregarAnalisis,
+    verProductosPaciente,
+    cancelarCita } from "../controllers/pacienteController.js";
 
 //Registro, login y confirmar Paciente
 router.post("/", registrarPaciente)
@@ -37,14 +44,24 @@ router.delete("/main/carrito/vaciar-carrito", checkAuthPaciente, vaciarCarrito);
 router.get("/main/carrito/visualizar-carrito", checkAuthPaciente, visualizarCarrito);
 
 //Pedidos
-router.get("main/pedido/visualizar-pedido", checkAuthPaciente, verHistorialPedidos);
+router.get("/main/pedido/visualizar-pedido", checkAuthPaciente, verHistorialPedidos);
 
 // Gestionar citas
 router.post("/main/generar-cita", checkAuthPaciente, generarCita);
 router.get("/main/ver-doctores", checkAuthPaciente, verDoctores);
+router.get("/main/ver-citas", checkAuthPaciente, verCitas);
+router.delete("/main/cancelar-cita", checkAuthPaciente, cancelarCita);
 
 // Tarjetas
 router.post("/main/agregar-tarjeta", checkAuthPaciente, agregarTarjeta);
 router.delete("/main/eliminar-tarjeta/:numTarjeta", checkAuthPaciente, eliminarTarjeta);
+router.get("/main/ver-tarjetas", checkAuthPaciente, verTarjetas);
+
+// Análisis
+router.post("/main/agregar-analisis", checkAuthPaciente, agregarAnalisis);
+router.get("/main/visualizar-analisis", checkAuthPaciente, verAnalisis);
+
+// Productos
+router.get("/main/ver-productos", checkAuthPaciente, verProductosPaciente);
 
 export default router;

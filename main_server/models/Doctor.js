@@ -62,6 +62,14 @@ const doctorSchema = mongoose.Schema({
         type: String,
         trim: true
     },
+    descripcionDoctor: {
+        type: String,
+        trim: true
+    },
+    imagenDoctor: {
+        type: String,
+        trim: true
+    },
     direccion: {
         type: String,
         trim: true
