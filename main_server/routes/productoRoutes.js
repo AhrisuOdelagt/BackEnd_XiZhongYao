@@ -1,11 +1,13 @@
 import express from "express";
 import checkAuthAdmin from "../middleware/checkAuthAdmin.js";
+import checkAuthPaciente from "../middleware/checkAuthPaciente.js"
 import {
     registrarProducto,
     verProductos,
     verProducto,
     modificarProducto,
-    eliminarProducto
+    eliminarProducto,
+    verProductosPaciente
 } from "../controllers/productosController.js";
 
 const router = express.Router();
@@ -20,5 +22,7 @@ router.get("/verProducto/:nombreProducto", checkAuthAdmin, verProducto);
 router.put("/modificarProducto/:nombreProducto", checkAuthAdmin, modificarProducto);
 // Elminar producto
 router.delete("/eliminarProducto/:nombreProducto", checkAuthAdmin, eliminarProducto);
+//Ver productos paciente
+router.post("/verProductos", checkAuthPaciente, verProductosPaciente);
 
 export default router;

@@ -1,5 +1,6 @@
 import Producto from "../models/Producto.js";
 import Administrador from "../models/Administrador.js";
+import Paciente from "../models/Paciente.js";
 import { removeImage,
     uploadImg } from "../helpers/gestionImagenes.js";
 
@@ -258,10 +259,35 @@ const eliminarProducto = async (req, res) => {
     }
 };
 
+const verProductosPaciente = async (req, res) => {
+    // Autenticamos al usuario
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    // Verificamos una sesión de paciente activa
+    if (!paciente) {
+        const error = new Error("Este usuario no ha iniciado sesión.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté confirmada
+    if(paciente.isConfirmed == false){
+        const error = new Error("Esta cuenta no está confirmada.");
+        return res.status(403).json({msg: error.message});
+    }
+
+    try {
+        const documentos = await Producto.find();
+        res.json({ productos: documentos });
+    } catch (error) {
+        console.log(error);
+    }
+};
+
 export {
     registrarProducto,
     verProductos,
     verProducto,
     modificarProducto,
-    eliminarProducto
+    eliminarProducto,
+    verProductosPaciente
 };
