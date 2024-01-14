@@ -1,6 +1,7 @@
 import express from "express";
 import checkAuthDoctor from "../middleware/checkAuthDoctor.js";
 import checkAuthAdmin from "../middleware/checkAuthAdmin.js";
+import checkAuthPaciente from "../middleware/checkAuthPaciente.js";
 const router = express.Router();
 
 import  { 
@@ -18,7 +19,9 @@ import  {
         procesarCita,
         consultarDoctores,
         consultarDoctor,
-        eliminarDoctor
+        eliminarDoctor,
+        consultarDoctoresPaciente,
+        consultarDoctorPaciente
         } from "../controllers/doctorController.js";
 
 //Registro, login y confirmar Doctores
@@ -40,8 +43,12 @@ router.get("/main/ver-citas", checkAuthDoctor, verCitas);
 router.post("/main/procesar-citas", checkAuthDoctor, procesarCita);
 //Consultar doctores
 router.get("/consultarDoctores", checkAuthAdmin, consultarDoctores);
+//Consultar doctores paciente
+router.get("/consultarDoctoresP", checkAuthPaciente, consultarDoctoresPaciente)
 //Consultar doctor
 router.get("/consultarDoctor/:usernameDoctor", checkAuthAdmin, consultarDoctor)
+//Consultar doctor paciente
+router.get("/consultarDoctorP/:usernameDoctor", checkAuthPaciente, consultarDoctorPaciente)
 //Eliminar doctor
 router.delete("/eliminarDoctor/:usernameDoctor", checkAuthAdmin, eliminarDoctor)
 

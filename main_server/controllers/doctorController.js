@@ -671,6 +671,62 @@ const eliminarDoctor = async (req, res) => {
     }
 }
 
+const consultarDoctorPaciente = async (req, res) => {
+
+    // Autenticamos al usuario
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    // Verificamos una sesión de paciente activa
+    if (!paciente) {
+        const error = new Error("Este usuario no ha iniciado sesión.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté confirmada
+    if(paciente.isConfirmed == false){
+        const error = new Error("Esta cuenta no está confirmada.");
+        return res.status(403).json({msg: error.message});
+    }
+
+    try{
+        let {usernameDoctor} = req.params;
+        const doctor = await Doctor.findOne({usernameDoctor});
+        if(!doctor) {
+            const error = new Error("El doctor no esta registrado.")
+            return res.status(404).json({msg: error.message});
+        }
+        res.json(doctor);
+    } catch(error){
+        console.log(error);
+    }
+    
+}
+
+const consultarDoctoresPaciente = async (req, res) => {
+    
+    // Autenticamos al usuario
+    let emailPaciente;
+    emailPaciente = req.paciente.emailPaciente;
+    const paciente = await Paciente.findOne({ emailPaciente });
+    // Verificamos una sesión de paciente activa
+    if (!paciente) {
+        const error = new Error("Este usuario no ha iniciado sesión.");
+        return res.status(403).json({msg: error.message});
+    }
+    // Verificamos que su cuenta esté confirmada
+    if(paciente.isConfirmed == false){
+        const error = new Error("Esta cuenta no está confirmada.");
+        return res.status(403).json({msg: error.message});
+    }
+
+    try{
+        const docs = await Doctor.find();
+        res.json({doctores: docs})
+    } catch(error){
+        console.log(error);
+    }
+}
+
 export {
     registrarDoctor,
     loginDoctor,
@@ -686,5 +742,7 @@ export {
     procesarCita,
     consultarDoctor,
     consultarDoctores,
-    eliminarDoctor
+    eliminarDoctor,
+    consultarDoctoresPaciente, 
+    consultarDoctorPaciente
 };
