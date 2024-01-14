@@ -7,7 +7,8 @@ import {
     verProducto,
     modificarProducto,
     eliminarProducto,
-    verProductosPaciente
+    verProductosPaciente,
+    verProductoPaciente
 } from "../controllers/productosController.js";
 
 const router = express.Router();
@@ -24,5 +25,7 @@ router.put("/modificarProducto/:nombreProducto", checkAuthAdmin, modificarProduc
 router.delete("/eliminarProducto/:nombreProducto", checkAuthAdmin, eliminarProducto);
 //Ver productos paciente
 router.post("/verProductos", checkAuthPaciente, verProductosPaciente);
+//Ver producto paciente
+router.get("/verProductoP/:nombreProducto", checkAuthPaciente, verProductoPaciente)
 
 export default router;
